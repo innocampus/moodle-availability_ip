@@ -24,7 +24,11 @@
 
 namespace availability_ip;
 
+use cm_info;
 use core_availability\frontend as abstract_frontend;
+use dml_exception;
+use section_info;
+use stdClass;
 
 /**
  * Class for front-end (editing form) functionality.
@@ -36,5 +40,27 @@ use core_availability\frontend as abstract_frontend;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class frontend extends abstract_frontend {
-    // TODO
+
+    /**
+     * Returns an array of arguments to be passed to the plugin's JavaScript `initInner` function.
+     *
+     * The only element/argument in that array will be an array of preset IP options for constructing the select field.
+     * Each option will be represented by an associative array with the keys `id` and `name`.
+     *
+     * @param stdClass $course Course object
+     * @param cm_info|null $cm Course-module currently being edited (`null` if none)
+     * @param section_info|null $section Section currently being edited (`null` if none)
+     * @return array Array of elements to be passed to the JavaScript function as arguments
+     * @throws dml_exception
+     */
+    protected function get_javascript_init_params($course, cm_info|null $cm = null, section_info|null $section = null): array {
+        $optionpresets = admin_setting_ip_options::get_parsed('availability_ip', 'ip_option_presets');
+        // Do not show the actual IP ranges to the client.
+        return [
+            array_map(
+                fn (admin_ip_option $option): array => ['id' => $option->id, 'name' => $option->name],
+                array_values($optionpresets),
+            )
+        ];
+    }
 }

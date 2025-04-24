@@ -1,3 +1,5 @@
+YUI.add('moodle-availability_ip-form', function (Y, NAME) {
+
 /**
  * YUI code for extending the availability form.
  *
@@ -109,3 +111,6 @@ M.availability_ip.form.fillErrors = function(errors, node) {
         errors.push('availability_ip:error_select_ip');
     }
 };
+
+
+}, '@VERSION@', {"requires": ["base", "node", "event", "moodle-core_availability-form"]});

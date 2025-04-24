@@ -4,7 +4,7 @@ Moodle availability plugin to allow restricting activities and sections by IP ad
 
 ## Requirements
 
-This plugin requires at least Moodle `4.5`.
+This plugin requires at least Moodle `4.4`.
 
 ## Installation
 
