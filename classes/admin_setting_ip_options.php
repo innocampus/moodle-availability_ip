@@ -40,6 +40,14 @@ require_once($CFG->libdir . '/adminlib.php');
  */
 class admin_setting_ip_options extends admin_setting_configtextarea {
 
+    public function output_html($data, $query = ''): string {
+        $style = '<style>' . "\n";
+        $style .= "textarea[name=\"{$this->get_full_name()}\"] ";
+        $style .= '{ font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; }' . "\n";
+        $style .= '</style>' . "\n";
+        return $style . parent::output_html($data, $query);
+    }
+
     /**
      * Validates contents of the text field before storage.
      *
