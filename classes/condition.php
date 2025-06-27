@@ -25,6 +25,7 @@
 namespace availability_ip;
 
 use core\exception\coding_exception;
+use core\lang_string;
 use core_availability\condition as abstract_condition;
 use core_availability\info;
 use dml_exception;
@@ -95,9 +96,8 @@ class condition extends abstract_condition {
         return $not;
     }
 
-    public function get_description($full, $not, info $info): string {
-        // TODO: Replace this with a `lang_string`.
-        return 'IP address allowed';
+    public function get_description($full, $not, info $info): lang_string {
+        return new lang_string('condition_description', 'availability_ip');
     }
 
     protected function get_debug_string(): string {

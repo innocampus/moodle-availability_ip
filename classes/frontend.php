@@ -25,6 +25,7 @@
 namespace availability_ip;
 
 use cm_info;
+use core\exception\coding_exception;
 use core_availability\frontend as abstract_frontend;
 use dml_exception;
 use section_info;
@@ -51,6 +52,7 @@ class frontend extends abstract_frontend {
      * @param cm_info|null $cm Course-module currently being edited (`null` if none)
      * @param section_info|null $section Section currently being edited (`null` if none)
      * @return array Array of elements to be passed to the JavaScript function as arguments
+     * @throws coding_exception
      * @throws dml_exception
      */
     protected function get_javascript_init_params($course, cm_info|null $cm = null, section_info|null $section = null): array {

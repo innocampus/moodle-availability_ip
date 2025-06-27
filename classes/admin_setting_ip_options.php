@@ -25,6 +25,7 @@
 namespace availability_ip;
 
 use admin_setting_configtextarea;
+use core\exception\coding_exception;
 use dml_exception;
 
 defined('MOODLE_INTERNAL') || die;
@@ -55,6 +56,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
      *
      * @param string $data Text entered by the admin
      * @return true|string `true` if validation was successful, error string otherwise
+     * @throws coding_exception
      */
     public function validate($data): bool|string {
         if (true !== $result = parent::validate($data)) {
@@ -71,6 +73,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
      *                     See the `ip_option_presets_help` language string for details.
      * @return admin_ip_option[]|string If successful, returns an associative array, where the keys are IDs of the option presets,
      *                                  and the values are instances of {@see admin_ip_option}. Error string otherwise.
+     * @throws coding_exception
      */
     public static function parse_ip_options(string $data): array|string {
         $options = [];
@@ -82,8 +85,11 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
             }
             if ($option = admin_ip_option::parse($line)) {
                 if (array_key_exists($option->id, $options)) {
-                    // TODO: Replace this with a `lang_string`.
-                    return "duplicate id '$option->id' in line " . $idx + 1;
+                    return get_string(
+                        identifier: 'settings_error_duplicate_option_id',
+                        component: 'availability_ip',
+                        a: ['id'  => $option->id, 'line' => $idx + 1],
+                    );
                 }
                 $options[$option->id] = $option;
             } else {
@@ -91,8 +97,11 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
             }
         }
         if ($badlines) {
-            // TODO: Replace this with a `lang_string`.
-            return 'bad lines: ' . implode(',', $badlines);
+            return get_string(
+                identifier: 'settings_error_bad_lines',
+                component: 'availability_ip',
+                a: '"' . implode('", "', $badlines) . '"',
+            );
         }
         return $options;
     }
@@ -104,6 +113,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
      * @param string $name Name of the config setting`.
      * @return admin_ip_option[] Associative array, where the keys are the IDs of the option presets, and the values are instances
      *                           of {@see admin_ip_option}.
+     * @throws coding_exception
      * @throws dml_exception
      */
     public static function get_parsed(string $plugin, string $name): array {
