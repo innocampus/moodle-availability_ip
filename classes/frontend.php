@@ -65,4 +65,8 @@ class frontend extends abstract_frontend {
             )
         ];
     }
+
+    protected function get_javascript_strings(): array {
+        return ['ip_options_select'];
+    }
 }

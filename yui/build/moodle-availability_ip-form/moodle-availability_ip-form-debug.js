@@ -47,25 +47,18 @@ M.availability_ip.form.initInner = function(ipoptions) {
  */
 M.availability_ip.form.getNode = function(json) {
     // TODO: See if we can use a template instead.
-    // TODO: Make this a multi-/checkbox-select.
-    var html = '<label><span class="pe-3">' + M.util.get_string('title', 'availability_ip') + '</span> ' +
-        '<span class="availability-group">' +
-        '<select name="ip" class="custom-select">' +
-        '<option value="choose">' + M.util.get_string('choosedots', 'moodle') + '</option>';
+    var html = '<label><span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
+               '<span class="availability-group" id="availability_ip-options">';
+    var initialvalues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
-        html += '<option value="' + option.id + '">' + option.name + '</option>';
+        var checkedattr = initialvalues.includes(option.id) ? ' checked' : '';
+        html += '<div class="form-check">' +
+                '<input class="form-check-input" type="checkbox" value="" id="' + option.id + '"' + checkedattr + '>' +
+                '<label class="form-check-label" for="' + option.id + '">' + option.name + '</label>' +
+                '</div>';
     });
-    html += '</select></span></label>';
+    html += '</span></label>';
     var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
-    // Set the initial value if specified.
-    if (json.ids !== undefined) {
-        var initialvalue = json.ids[0];
-        // If the initial value is invalid (i.e. no such option exists), select the `choose` option.
-        if (!node.one('select[name=ip] > option[value=' + initialvalue + ']')) {
-            initialvalue = 'choose';
-        }
-        node.one('select[name=ip]').set('value', initialvalue);
-    }
     // Add event handlers.
     if (!M.availability_ip.form.addedEvents) {
         M.availability_ip.form.addedEvents = true;
@@ -73,7 +66,7 @@ M.availability_ip.form.getNode = function(json) {
         container.delegate('change', function() {
             // Update the form fields.
             M.core_availability.form.update();
-        }, '.availability_ip select');
+        }, '.availability_ip input');
     }
     return node;
 };
@@ -82,14 +75,19 @@ M.availability_ip.form.getNode = function(json) {
  * Fills in the value from this plugin's controls into a value object,
  * which will later be converted to JSON and stored in the form field.
  *
- * Sets the `id` property to the value of the selected option.
+ * Sets the `ids` property to the ids of the checked options.
  *
  * @method fillValue
  * @param {Object} value Value object (to be written to)
  * @param {Y.Node} node YUI node (same one returned from getNode)
  */
 M.availability_ip.form.fillValue = function(value, node) {
-    value.ids = [node.one('select[name=ip]').get('value')];
+    value.ids = [];
+    node.one('span[id=availability_ip-options]').all('input').each(function(input) {
+        if (input.get('checked')) {
+            value.ids.push(input.get('id'));
+        }
+    });
 };
 
 /**
@@ -97,7 +95,7 @@ M.availability_ip.form.fillValue = function(value, node) {
  *
  * Errors are Moodle language strings in format `component:string`, e.g. `availability_ip:error_select_ip`.
  *
- * This method currently only checks whether anything other than the default `choose` option was actually selected.
+ * This method currently only checks whether anything was actually selected.
  *
  * @method fillErrors
  * @param {Array} errors Array of errors (push new errors here)
@@ -107,7 +105,7 @@ M.availability_ip.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
 
-    if (value.ids[0] === 'choose') {
+    if (value.ids.length === 0) {
         errors.push('availability_ip:error_select_ip');
     }
 };

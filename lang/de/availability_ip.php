@@ -26,9 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['condition_description'] = 'IP Adresse zugelassen';
 $string['description'] = 'Erlaube den Zugriff nur von bestimmten IP Adressen.';
-$string['error_select_ip'] = 'IP Adresse/Adressbereich nicht ausgewählt.';
+$string['error_select_ip'] = 'Keine IP Adressen/Adressbereiche ausgewählt.';
 $string['ip_option_presets'] = 'Voreingestellte IP Optionen';
 $string['ip_option_presets_help'] = '<p>Liste voreingestellter Optionen für die IP Voraussetzung, aus denen gewählt werden kann. Schreiben Sie jede Option in eine neue Zeile.</p><p>Optionen müssen in der Form <code>IP eindeutiger_kurzname Anzeigename</code> sein, wobei <code>IP</code> eine vollständig IP-Adresse für ein einzelnes Gerät ist (z.B. <code>192.168.10.1</code>). Ebenfalls gültig als <code>IP</code> sind IP-Adressbereiche (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder IP-Adressen in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>). <code>eindeutiger_kurzname</code> darf nur aus Kleinbuchstaben (<code>a-z</code>) und Unterstrichen (<code>_</code>) bestehen.</p><p>Beispiel:<pre>192.168.7.0/24  pc_pool  Lokaler PC Pool der Universität<br>111.222.333.444 admin_hq Admin HQ</pre></p><p><strong>ACHTUNG: Ein nachträgliches Entfernen von Optionen oder Ändern von Kurznamen kann bestehende Voraussetzungen zerstören!</strong></p>';
+$string['ip_options_select'] = 'Aus einem der ausgewählten IP Adressbereiche zugreifen:';
 $string['pluginname'] = 'Voraussetzung IP';
 $string['settings_error_bad_lines'] = 'Zeilen nicht in gültiger Form: {$a}';
 $string['settings_error_duplicate_option_id'] = 'Der Kurzname \'{$a->id}\' in Zeile {$a->line} wird weiter oben bereits verwendet.';
