@@ -37,6 +37,13 @@ M.availability_ip.form = Y.Object(M.core_availability.plugin);
  */
 M.availability_ip.form.initInner = function(ipoptions) {
     this.ipoptions = ipoptions;
+    // Construct IP address validation RegEx for the custom IP address/range input.
+    // To keep it "simple", we do not capture `0.0.0.0`; using that would render the entire access restriction moot.
+    var firstOctet = /(25[0-5]|2[0-4]\d|[1-9]\d?\d?)/;
+    var otherOctets = /(?:\.(25[0-5]|2[0-4]\d|[1-9]\d?\d?|0)){3}/;
+    var cidrLengthOrRangeEnd = /(?:\/(\d|[12]\d|3[0-2])|-(25[0-5]|2[0-4]\d|[1-9]\d?\d?|0))?/;
+    this.ipregex = new RegExp('^' + firstOctet.source + otherOctets.source + cidrLengthOrRangeEnd.source + '$');
+    // TODO: Behat tests incoming...
 };
 
 /**
@@ -49,21 +56,33 @@ M.availability_ip.form.getNode = function(json) {
     // TODO: See if we can use a template instead.
     var html = '<label><span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
                '<span class="availability-group" id="availability_ip-options">';
-    var initialvalues = json.ids !== undefined ? json.ids : [];
+    var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
-        var checkedattr = initialvalues.includes(option.id) ? ' checked' : '';
+        var checkedAttr = initialValues.includes(option.id) ? ' checked' : '';
         html += '<div class="form-check">' +
-                '<input class="form-check-input" type="checkbox" value="" id="' + option.id + '"' + checkedattr + '>' +
+                '<input class="form-check-input" type="checkbox" value="" id="' + option.id + '"' + checkedAttr + '>' +
                 '<label class="form-check-label" for="' + option.id + '">' + option.name + '</label>' +
                 '</div>';
     });
+    var customValue = json.custom !== undefined ? json.custom : '';
+    html += '<div class="mt-2">' +
+            '<label class="form-label" for="-custom-">' + M.util.get_string('custom_ip', 'availability_ip') + '</label>' +
+            '<input id="-custom-" ' +
+                   'type="text" ' +
+                   'value="' + customValue + '" ' +
+                   'class="form-control" ' +
+                   'aria-describedby="custom-help">' +
+            '<div class="form-text text-muted" id="custom-help">' +
+            M.util.get_string('custom_ip_help', 'availability_ip') +
+            '</div>' +
+            '</div>';
     html += '</span></label>';
     var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
-    // Add event handlers.
+    // Add event handlers for when a checkbox is ticked (`change`) or custom input changes (`input`).
     if (!M.availability_ip.form.addedEvents) {
         M.availability_ip.form.addedEvents = true;
         var container = Y.one('.availability-field');
-        container.delegate('change', function() {
+        container.delegate(['change', 'input'], function() {
             // Update the form fields.
             M.core_availability.form.update();
         }, '.availability_ip input');
@@ -75,19 +94,23 @@ M.availability_ip.form.getNode = function(json) {
  * Fills in the value from this plugin's controls into a value object,
  * which will later be converted to JSON and stored in the form field.
  *
- * Sets the `ids` property to the ids of the checked options.
+ * Sets the `ids` property to the ids of the checked options
+ * and the `custom` property to the value in the custom IP input.
  *
  * @method fillValue
  * @param {Object} value Value object (to be written to)
  * @param {Y.Node} node YUI node (same one returned from getNode)
  */
 M.availability_ip.form.fillValue = function(value, node) {
+    // Collect values from all selected checkboxes.
     value.ids = [];
     node.one('span[id=availability_ip-options]').all('input').each(function(input) {
         if (input.get('checked')) {
             value.ids.push(input.get('id'));
         }
     });
+    // Get custom input value.
+    value.custom = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
 };
 
 /**
@@ -95,7 +118,9 @@ M.availability_ip.form.fillValue = function(value, node) {
  *
  * Errors are Moodle language strings in format `component:string`, e.g. `availability_ip:error_select_ip`.
  *
- * This method currently only checks whether anything was actually selected.
+ * This method pushes an error if
+ * - no preset was selected and no custom IP address/range was entered or
+ * - a custom value was entered, but it does not represent a valid IP address/range.
  *
  * @method fillErrors
  * @param {Array} errors Array of errors (push new errors here)
@@ -104,8 +129,15 @@ M.availability_ip.form.fillValue = function(value, node) {
 M.availability_ip.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
-
-    if (value.ids.length === 0) {
+    if (value.custom !== '') {
+        // Ensure the entered value matches our regular expression.
+        // If range notation is used, ensure the end of the range is greater than or equal to the start of the range.
+        var matches = this.ipregex.exec(value.custom);
+        if (matches === null || matches.length === 5 && matches[2] > matches[4]) {
+            errors.push('availability_ip:error_custom_ip');
+        }
+    } else if (value.ids.length === 0) {
+        // Neither a custom input was provided, nor a checkbox selected.
         errors.push('availability_ip:error_select_ip');
     }
 };

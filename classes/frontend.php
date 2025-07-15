@@ -67,6 +67,12 @@ class frontend extends abstract_frontend {
     }
 
     protected function get_javascript_strings(): array {
-        return ['ip_options_select'];
+        return [
+            'custom_ip',
+            'custom_ip_help',
+            'error_custom_ip',
+            'error_select_ip',
+            'ip_options_select',
+        ];
     }
 }

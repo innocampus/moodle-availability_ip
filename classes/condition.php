@@ -25,6 +25,7 @@
 namespace availability_ip;
 
 use core\exception\coding_exception;
+use core\ip_utils;
 use core\lang_string;
 use core_availability\condition as abstract_condition;
 use core_availability\info;
@@ -34,9 +35,9 @@ use stdClass;
 /**
  * Availability condition class.
  *
- * Depends on an array of IDs that represent valid IP range presets defined by admins in the `ip_option_presets` setting.
- * These IDs must be passed to the constructor via an `ids` property on the `$structure` argument.
- * IDs that do not match admin presets are ignored.
+ * Depends on an array of IDs that represent valid IP range presets defined by admins in the `ip_option_presets` setting and/or a
+ * custom IP address/range. These must be passed to the constructor via the `ids` and `custom` properties respectively on the
+ * `$structure` argument. IDs that do not match admin presets are ignored.
  *
  * For {@see is_available} to be `true` for a given user, the user's IP address has to fall within at least one of those IP ranges.
  * **CAUTION**: If no (valid) IP address/range is provided, {@see is_available} will always be `false` for positive conditions and
@@ -53,25 +54,36 @@ class condition extends abstract_condition {
     /** @var admin_ip_option[] $options Chosen options for the availability condition */
     public readonly array $options;
 
+    /** @var string|null $customip Custom IP address/range defined for the availability condition */
+    public readonly string|null $customip;
+
     /**
      * Sets the relevant properties based off of the provided JSON structure object.
      *
      * @param stdClass $structure Extracted from JSON data stored in the database as part of the tree structure of conditions
-     *                            relating to an activity. Must have an `ids` property set with values that correspond to valid IP
-     *                            option presets from the `ip_option_presets` configuration setting.
-     * @throws coding_exception The `ids` property is missing or not an array or contains invalid values.
+     *                            relating to an activity. Requires either an `ids` property or a `custom` property (or both).
+     *                            The former must be an array of values that correspond to valid IP option presets from the
+     *                            `ip_option_presets` configuration setting; the latter must be a valid IP address/range.
+     * @throws coding_exception The `$structure` neither has an `ids` nor a `custom` property.
+     *                          Or the `ids` property is not an array or contains non-string values.
+     *                          Or the `custom` property is not a valid IP address/range.
      * @throws dml_exception The admin settings for the plugin are not available.
      */
     public function __construct(stdClass $structure) {
-        if (!isset($structure->ids)) {
-            throw new coding_exception("The `ids` value is missing from the structure");
+        if (!isset($structure->ids) && !isset($structure->custom)) {
+            throw new coding_exception("Both `ids` and `custom` properties are missing from the structure.");
         }
-        if (!is_array($structure->ids)) {
-            throw new coding_exception("The `ids` value is not an array");
+        $ids = $structure->ids ?? [];
+        if (!is_array($ids)) {
+            throw new coding_exception("The `ids` property is not an array");
+        }
+        $this->customip = $structure->custom ?? null;
+        if (!is_null($this->customip) && !ip_utils::is_ipv4_address($this->customip) && !ip_utils::is_ipv4_range($this->customip)) {
+            throw new coding_exception("Not a valid custom IP address/range: $this->customip");
         }
         $optionpresets = admin_setting_ip_options::get_parsed('availability_ip', 'ip_option_presets');
         $options = [];
-        foreach ($structure->ids as $id) {
+        foreach ($ids as $id) {
             if (!is_string($id)) {
                 throw new coding_exception("The ID '$id' is not a string");
             }
@@ -93,6 +105,9 @@ class condition extends abstract_condition {
                 return !$not;
             }
         }
+        if (!is_null($this->customip) && address_in_subnet($clientip, $this->customip)) {
+            return !$not;
+        }
         return $not;
     }
 
@@ -105,6 +120,13 @@ class condition extends abstract_condition {
     }
 
     public function save(): stdClass {
-        return (object) ['type' => 'ip', 'ids' => array_column($this->options, 'id')];
+        $structure = ['type' => 'ip'];
+        if (count($this->options) > 0) {
+            $structure['ids'] = array_column($this->options, 'id');
+        }
+        if (!is_null($this->customip)) {
+            $structure['custom'] = $this->customip;
+        }
+        return (object) $structure;
     }
 }
