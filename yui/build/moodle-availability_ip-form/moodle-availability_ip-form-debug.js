@@ -133,7 +133,7 @@ M.availability_ip.form.fillErrors = function(errors, node) {
         // Ensure the entered value matches our regular expression.
         // If range notation is used, ensure the end of the range is greater than or equal to the start of the range.
         var matches = this.ipregex.exec(value.custom);
-        if (matches === null || matches.length === 5 && matches[2] > matches[4]) {
+        if (matches === null || matches.length === 5 && parseInt(matches[2]) > parseInt(matches[4])) {
             errors.push('availability_ip:error_custom_ip');
         }
     } else if (value.ids.length === 0) {
