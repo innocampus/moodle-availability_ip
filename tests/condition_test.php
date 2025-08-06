@@ -1,0 +1,334 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Definition of the {@see condition_test} class.
+ *
+ * @package    availability_ip
+ * @copyright  2025 Daniel Fainberg, TU Berlin
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * {@noinspection PhpIllegalPsrClassPathInspection}
+ */
+
+namespace availability_ip;
+
+use advanced_testcase;
+use core\exception\coding_exception;
+use core\lang_string;
+use core_availability\mock_info;
+use dml_exception;
+use moodle_exception;
+
+/**
+ * Unit tests for the {@see condition} class.
+ *
+ * @coversDefaultClass \availability_ip\condition
+ * @package    availability_ip
+ * @copyright  2025 Daniel Fainberg, TU Berlin
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class condition_test extends advanced_testcase {
+
+    /**
+     * Ensures that relevant files are loaded.
+     */
+    public static function setupBeforeClass(): void {
+        global $CFG;
+        parent::setupBeforeClass();
+        require_once("$CFG->dirroot/availability/tests/fixtures/mock_info.php");
+    }
+
+    /**
+     * @covers ::__construct
+     * @dataProvider test___construct_provider
+     * @param array $presets Admin options presets to set at the beginning.
+     * @param array $structure Constructor argument for {@see condition}.
+     * @param array|string $expected An array representing the expected properties of the initialized {@see condition} instance or
+     *                               the class name of the expected error. If the array contains the `customip` key, the instance
+     *                               is expected to have the same value in its `customip` property. If the array contains the
+     *                               `options` key, its value must be an array of associative arrays with the keys `id`, `ip`,
+     *                               and `name` that the instances `options` property will be checked against.
+     * @param bool $debugging If `true`, a debugging call will be expected.
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function test___construct(array $presets, array $structure, array|string $expected, bool $debugging = false): void {
+        $this->resetAfterTest();
+        self::configure_ip_option_presets($presets);
+        if (is_string($expected)) {
+            $this->expectException($expected);
+            new condition((object) $structure);
+            return;
+        }
+        $condition = new condition((object) $structure);
+        if (array_key_exists('customip', $expected)) {
+            self::assertSame($expected['customip'], $condition->customip);
+        }
+        $optionids = array_column($condition->options, 'id');
+        $optionips = array_column($condition->options, 'ip');
+        $optionnames = array_column($condition->options, 'name');
+        if (array_key_exists('options', $expected)) {
+            foreach ($expected['options'] as $option) {
+                self::assertContains($option['id'], $optionids);
+                self::assertContains($option['ip'], $optionips);
+                self::assertContains($option['name'], $optionnames);
+            }
+        }
+        if ($debugging) {
+            self::assertDebuggingCalled();
+        }
+    }
+
+    /**
+     * Data provider for the {@see test___construct} method.
+     *
+     * @return array[] Inputs for the test method.
+     */
+    public static function test___construct_provider(): array {
+        return [
+            'No `ids` and no `custom`' => [
+                'presets' => [],
+                'structure' => ['spam' => 'eggs'],
+                'expected' => coding_exception::class,
+            ],
+            'Not an array in `ids`' => [
+                'presets' => [],
+                'structure' => ['ids' => 'beans'],
+                'expected' => coding_exception::class,
+            ],
+            'Invalid IP in `custom`' => [
+                'presets' => [],
+                'structure' => ['custom' => '1.2.3.400'],
+                'expected' => coding_exception::class,
+            ],
+            'Non-string ID in `ids`' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                ],
+                'structure' => ['ids' => ['foo', 3.14]],
+                'expected' => coding_exception::class,
+            ],
+            'No option preset matches one of the IDs in `ids`' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                ],
+                'structure' => ['ids' => ['foo', 'bar']],
+                'expected' => ['customip' => null],
+                'debugging' => true,
+            ],
+            'Only a `custom` IP' => [
+                'presets' => [],
+                'structure' => ['custom' => '192.168.0.1'],
+                'expected' => ['customip' => '192.168.0.1'],
+            ],
+            'Valid `ids` and valid `custom`' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                ],
+                'structure' => [
+                    'ids' => ['foo', 'bar'],
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => [
+                    'options' => [
+                        ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                        ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    ],
+                    'customip' => '192.168.0.1',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @covers ::is_available
+     * @dataProvider test_is_available_provider
+     * @param array $presets Admin options presets to set at the beginning.
+     * @param array $structure Constructor argument for {@see condition}.
+     * @param bool $expected Whether we expect the test module to be available to the user.
+     * @throws moodle_exception
+     */
+    public function test_is_available(array $presets, array $structure, bool $expected): void {
+        $this->resetAfterTest();
+        self::configure_ip_option_presets($presets);
+        $condition = new condition((object) $structure);
+        $user = $this->getDataGenerator()->create_user();
+        $info = new mock_info();
+        self::assertTrue($condition->is_available(not: !$expected, info: $info, grabthelot: false, userid: $user->id));
+        self::assertFalse($condition->is_available(not: $expected, info: $info, grabthelot: false, userid: $user->id));
+    }
+
+    /**
+     * Data provider for the {@see test_is_available} method.
+     *
+     * @return array[] Inputs for the test method.
+     */
+    public static function test_is_available_provider(): array {
+        return [
+            'IP neither matches an admin option preset nor the custom range' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                ],
+                'structure' => [
+                    'ids' => ['foo', 'bar'],
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => false,
+            ],
+            'IP matches an admin option exactly' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    ['ip' => condition::PHPUNIT_CLIENT_IP, 'id' => 'testing', 'name' => 'Testing'],
+                ],
+                'structure' => [
+                    'ids' => ['foo', 'bar', 'testing'],
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => true,
+            ],
+            'IP falls in an admin option range' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    ['ip' => condition::PHPUNIT_CLIENT_IP . '-255', 'id' => 'testing', 'name' => 'Testing'],
+                ],
+                'structure' => [
+                    'ids' => ['foo', 'bar', 'testing'],
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => true,
+            ],
+            'IP matches custom setting exactly' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                ],
+                'structure' => [
+                    'ids' => ['foo', 'bar'],
+                    'custom' => condition::PHPUNIT_CLIENT_IP,
+                ],
+                'expected' => true,
+            ],
+        ];
+    }
+
+    /**
+     * @covers ::get_description
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function test_get_description(): void {
+        $condition = new condition((object) ['ids' => []]);
+        $info = new mock_info();
+        $expected = new lang_string('condition_description', 'availability_ip');
+        self::assertEquals($expected, $condition->get_description(full: false, not: false, info: $info));
+        self::assertEquals($expected, $condition->get_description(full: false, not: true, info: $info));
+        self::assertEquals($expected, $condition->get_description(full: true, not: false, info: $info));
+        self::assertEquals($expected, $condition->get_description(full: true, not: true, info: $info));
+    }
+
+    /**
+     * @covers ::get_debug_string
+     *
+     * {@noinspection PhpUndefinedMethodInspection}
+     */
+    public function test_get_debug_string(): void {
+        // We expect our implementation to simply JSON encode the return value of the `save` method.
+        // Therefore, we simply mock the `save` method and check if it is called.
+        $condition = $this->getMockBuilder(condition::class)
+                          ->disableOriginalConstructor()
+                          ->onlyMethods(['save'])
+                          ->getMock();
+        $saveobject = (object) ['type' => 'ip', 'foo' => 'bar'];
+        $condition->expects($this->once())
+                  ->method('save')
+                  ->willReturn($saveobject)
+                  ->with();
+        // Simple closure binding workaround to test the protected method.
+        $closure = function(): string { return $this->get_debug_string(); };
+        $output = $closure->call($condition);
+        self::assertSame(json_encode($saveobject), $output);
+    }
+
+    /**
+     * @covers ::save
+     * @dataProvider test_save_provider
+     * @param array $presets Admin options presets to set at the beginning.
+     * @param array $structure Constructor argument for {@see condition}.
+     * @param array $expected Expected properties on the returned object.
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function test_save(array $presets, array $structure, array $expected): void {
+        $this->resetAfterTest();
+        self::configure_ip_option_presets($presets);
+        $condition = new condition((object) $structure);
+        self::assertEquals((object) $expected, $condition->save());
+    }
+
+    /**
+     * Data provider for the {@see test_save} method.
+     *
+     * @return array[] Inputs for the test method.
+     */
+    public static function test_save_provider(): array {
+        return [
+            'Just a custom IP' => [
+                'presets' => [],
+                'structure' => [
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => ['type' => 'ip', 'custom' => '192.168.0.1'],
+            ],
+            'Just a preset ID' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                ],
+                'structure' => [
+                    'ids' => ['foo'],
+                ],
+                'expected' => ['type' => 'ip', 'ids' => ['foo']],
+            ],
+            'Both a preset ID and a custom IP' => [
+                'presets' => [
+                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                ],
+                'structure' => [
+                    'ids' => ['foo'],
+                    'custom' => '192.168.0.1',
+                ],
+                'expected' => ['type' => 'ip', 'ids' => ['foo'], 'custom' => '192.168.0.1'],
+            ],
+        ];
+    }
+
+    private static function configure_ip_option_presets(array $presets): void {
+        $presetsstring = array_reduce(
+            array: $presets,
+            callback: fn (string $carry, array $preset): string => $carry . implode(' ', $preset) . "\n",
+            initial: '',
+        );
+        set_config(
+            name: 'ip_option_presets',
+            value: $presetsstring,
+            plugin: 'availability_ip',
+        );
+    }
+}

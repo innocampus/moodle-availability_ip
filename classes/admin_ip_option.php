@@ -37,6 +37,9 @@ use core\ip_utils;
 final class admin_ip_option {
 
     /**
+     * @param string $ip IP address/range.
+     * @param string $id Option identifier.
+     * @param string $name Human-readable name for the option.
      * @throws coding_exception The `$ìp` argument is not a valid ip address/range.
      */
     public function __construct(

@@ -50,6 +50,7 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends abstract_condition {
+    const PHPUNIT_CLIENT_IP = '255.255.255.254';
 
     /** @var admin_ip_option[] $options Chosen options for the availability condition */
     public readonly array $options;
@@ -81,6 +82,10 @@ class condition extends abstract_condition {
         if (!is_null($this->customip) && !ip_utils::is_ipv4_address($this->customip) && !ip_utils::is_ipv4_range($this->customip)) {
             throw new coding_exception("Not a valid custom IP address/range: $this->customip");
         }
+        if (count($ids) === 0) {
+            $this->options = [];
+            return;
+        }
         $optionpresets = admin_setting_ip_options::get_parsed('availability_ip', 'ip_option_presets');
         $options = [];
         foreach ($ids as $id) {
@@ -97,7 +102,7 @@ class condition extends abstract_condition {
     }
 
     public function is_available($not, info $info, $grabthelot, $userid): bool {
-        $clientip = getremoteaddr();
+        $clientip = PHPUNIT_TEST ? self::PHPUNIT_CLIENT_IP : getremoteaddr();
         // If the client IP matches at least one of the IP addresses/ranges, then the availability condition is satisfied.
         // When the condition is inverted (`$not === true`), at least one match means it is not satisfied.
         foreach ($this->options as $option) {

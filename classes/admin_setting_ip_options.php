@@ -28,9 +28,11 @@ use admin_setting_configtextarea;
 use core\exception\coding_exception;
 use dml_exception;
 
+// @codeCoverageIgnoreStart
 defined('MOODLE_INTERNAL') || die;
 global $CFG;
-require_once($CFG->libdir . '/adminlib.php');
+require_once("$CFG->libdir/adminlib.php");
+// @codeCoverageIgnoreEnd
 
 /**
  * Text area with validation for IP options.
@@ -40,11 +42,12 @@ require_once($CFG->libdir . '/adminlib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_ip_options extends admin_setting_configtextarea {
+    const FONT_FAMILY = 'var(--bs-font-monospace)';
 
     public function output_html($data, $query = ''): string {
         $style = '<style>' . "\n";
         $style .= "textarea[name=\"{$this->get_full_name()}\"] ";
-        $style .= '{ font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; }' . "\n";
+        $style .= '{ font-family: ' . self::FONT_FAMILY . '; }' . "\n";
         $style .= '</style>' . "\n";
         return $style . parent::output_html($data, $query);
     }
