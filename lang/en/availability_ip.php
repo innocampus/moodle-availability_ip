@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['condition_description'] = 'IP address allowed';
-$string['custom_ip'] = 'Custom IP address';
-$string['custom_ip_help'] = 'Input must either be a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address.';
+$string['custom_ip'] = 'Custom IP addresses';
+$string['custom_ip_help'] = 'Input must either be a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address. You can specify more than one by comma-separating your IP addresses/ranges.';
 $string['description'] = 'Allow only students with certain IP addresses.';
 $string['error_custom_ip'] = 'Invalid IP address entered.';
 $string['error_select_ip'] = 'No IP address/range selected.';

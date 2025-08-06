@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['condition_description'] = 'IP-Adresse zugelassen';
-$string['custom_ip'] = 'Selbstgewählte IP-Adresse';
-$string['custom_ip_help'] = 'Die Eingabe muss eine vollständige IP-Adresse für ein einzelnes Gerät (z.B. <code>192.168.10.1</code>), ein IP-Adressbereich (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder eine IP-Adresse in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>) sein.';
+$string['custom_ip'] = 'Selbstgewählte IP-Adressen';
+$string['custom_ip_help'] = 'Die Eingabe muss eine vollständige IP-Adresse für ein einzelnes Gerät (z.B. <code>192.168.10.1</code>), ein IP-Adressbereich (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder eine IP-Adresse in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>) sein. Sie können mehrere festlegen, indem Sie Ihre IP-Adressen/Adressbereiche durch Kommas trennen.';
 $string['description'] = 'Erlaube den Zugriff nur von bestimmten IP-Adressen.';
 $string['error_custom_ip'] = 'Keine valide IP-Adresse eingegeben.';
 $string['error_select_ip'] = 'Keine IP-Adressen/Adressbereiche ausgewählt.';

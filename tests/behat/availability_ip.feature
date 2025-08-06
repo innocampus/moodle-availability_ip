@@ -82,6 +82,9 @@ Feature: Setting availability conditions for a course module.
     # All zeros.
     When I set the custom IP field to "0.0.0.0"
     Then I should see a warning badge with "Invalid IP address entered."
+    # One of the entered IPs is invalid.
+    When I set the custom IP field to "127.0.0.1, 127.0.0.256, 127.0.0.2"
+    Then I should see a warning badge with "Invalid IP address entered."
 
     # These should all be valid inputs.
     When I set the custom IP field to "1.0.0.0"
@@ -95,6 +98,8 @@ Feature: Setting availability conditions for a course module.
     When I set the custom IP field to "10.0.0.1/32"
     Then I should not see "Invalid IP address entered."
     When I set the custom IP field to "3.2.1.0/24"
+    Then I should not see "Invalid IP address entered."
+    When I set the custom IP field to "1.0.0.0, 192.168.0.100-200, 3.2.1.0/24"
     Then I should not see "Invalid IP address entered."
 
   Scenario: Student IP does not match any of the selected IP options for an activity.
@@ -129,7 +134,7 @@ Feature: Setting availability conditions for a course module.
     # Log in as student. Module should be available.
     Given I am on the "Course 1" "course" page logged in as "student1"
     Then I should not see "Not available unless: IP address allowed"
-    When I follow "P1"
+    When I am on the "P1" "activity" page
     Then I should see "Test page content"
 
     Examples:
@@ -158,11 +163,12 @@ Feature: Setting availability conditions for a course module.
 
     # See `behat_availability_ip` class for the meaning of the special IP values.
     Examples:
-      | ip                  | should_or_should_not |
-      | <behat_user>        | should not           |
-      | <behat_user_range>  | should not           |
-      | <behat_user_cidr>   | should not           |
-      | <not_behat_user>    | should               |
+      | ip                             | should_or_should_not |
+      | <behat_user>                   | should not           |
+      | <behat_user_range>             | should not           |
+      | <behat_user_cidr>              | should not           |
+      | <not_behat_user>               | should               |
+      | <behat_user>, <not_behat_user> | should not           |
 
   Scenario: IP is combined with another availability condition.
     Given I am on the "P1" "page activity editing" page logged in as "teacher1"
@@ -186,5 +192,6 @@ Feature: Setting availability conditions for a course module.
     Then I should see "Not available"
     # Log in as student2. Now it should be available.
     Given I am on the "Course 1" "course" page logged in as "student2"
-    When I follow "P1"
+    Then I should not see "Not available"
+    When I am on the "P1" "activity" page
     Then I should see "Test page content"

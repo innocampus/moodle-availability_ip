@@ -34,8 +34,8 @@ use stdClass;
 /**
  * Availability condition class.
  *
- * Depends on an array of IDs that represent valid IP range presets defined by admins in the `ip_option_presets` setting and/or a
- * custom IP address/range. These must be passed to the constructor via the `ids` and `custom` properties respectively on the
+ * Depends on an array of IDs that represent valid IP range presets defined by admins in the `ip_option_presets` setting and/or
+ * custom IP addresses/ranges. These must be passed to the constructor via the `ids` and `custom` properties respectively on the
  * `$structure` argument. IDs that do not match admin presets are ignored.
  *
  * For {@see is_available} to be `true` for a given user, the user's IP address has to fall within at least one of those IP ranges.
@@ -54,8 +54,8 @@ class condition extends abstract_condition {
     /** @var admin_ip_option[] $options Chosen options for the availability condition */
     public readonly array $options;
 
-    /** @var string|null $customip Custom IP address/range defined for the availability condition */
-    public readonly string|null $customip;
+    /** @var string[] $customips Custom IP addresses/ranges defined for the availability condition */
+    public readonly array $customips;
 
     /**
      * Sets the relevant properties based off of the provided JSON structure object.
@@ -66,7 +66,7 @@ class condition extends abstract_condition {
      *                            `ip_option_presets` configuration setting; the latter must be a valid IP address/range.
      * @throws coding_exception The `$structure` neither has an `ids` nor a `custom` property.
      *                          Or the `ids` property is not an array or contains non-string values.
-     *                          Or the `custom` property is not a valid IP address/range.
+     *                          Or the `custom` property is not an array or contains an invalid IP address/range.
      * @throws dml_exception The admin settings for the plugin are not available.
      */
     public function __construct(stdClass $structure) {
@@ -77,9 +77,11 @@ class condition extends abstract_condition {
         if (!is_array($ids)) {
             throw new coding_exception("The `ids` property is not an array");
         }
-        $this->customip = empty($structure->custom) ? null : $structure->custom;
-        if (!is_null($this->customip) && !ip_utils::is_ipv4_address($this->customip) && !ip_utils::is_ipv4_range($this->customip)) {
-            throw new coding_exception("Not a valid custom IP address/range: $this->customip");
+        $this->customips = $structure->custom ?? [];
+        foreach ($this->customips as $custom) {
+            if (!ip_utils::is_ipv4_address($custom) && !ip_utils::is_ipv4_range($custom)) {
+                throw new coding_exception("Not a valid custom IP address/range: $custom");
+            }
         }
         if (count($ids) === 0) {
             $this->options = [];
@@ -109,8 +111,10 @@ class condition extends abstract_condition {
                 return !$not;
             }
         }
-        if (!is_null($this->customip) && address_in_subnet($clientip, $this->customip)) {
-            return !$not;
+        foreach ($this->customips as $custom) {
+            if (address_in_subnet($clientip, $custom)) {
+                return !$not;
+            }
         }
         return $not;
     }
@@ -129,8 +133,8 @@ class condition extends abstract_condition {
         if (count($this->options) > 0) {
             $structure['ids'] = array_column($this->options, 'id');
         }
-        if (!is_null($this->customip)) {
-            $structure['custom'] = $this->customip;
+        if (count($this->customips) > 0) {
+            $structure['custom'] = $this->customips;
         }
         return (object) $structure;
     }

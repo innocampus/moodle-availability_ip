@@ -62,7 +62,7 @@ M.availability_ip.form.getNode = function(json) {
                 '<label class="form-check-label" for="' + option.id + '">' + option.name + '</label>' +
                 '</div>';
     });
-    var customValue = json.custom !== undefined ? json.custom : '';
+    var customValue = json.custom !== undefined ? json.custom.join(', ') : '';
     html += '<div class="mt-2">' +
             '<label class="form-label" for="-custom-">' + M.util.get_string('custom_ip', 'availability_ip') + '</label>' +
             '<input id="-custom-" ' +
@@ -93,7 +93,7 @@ M.availability_ip.form.getNode = function(json) {
  * which will later be converted to JSON and stored in the form field.
  *
  * Sets the `ids` property to the ids of the checked options
- * and the `custom` property to the value in the custom IP input.
+ * and the `custom` property to an array of values taken from the custom IP input.
  *
  * @method fillValue
  * @param {Object} value Value object (to be written to)
@@ -107,8 +107,10 @@ M.availability_ip.form.fillValue = function(value, node) {
             value.ids.push(input.get('id'));
         }
     });
-    // Get custom input value.
-    value.custom = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
+    // Get custom ip addresses/ranges (comma-separated).
+    var customInput = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
+    // Split into an array and filter out empty strings.
+    value.custom = customInput.split(/\s*,\s*/).filter(Boolean);
 };
 
 /**
@@ -118,7 +120,7 @@ M.availability_ip.form.fillValue = function(value, node) {
  *
  * This method pushes an error if
  * - no preset was selected and no custom IP address/range was entered or
- * - a custom value was entered, but it does not represent a valid IP address/range.
+ * - custom values were entered, but at least one of them does not represent a valid IP address/range.
  *
  * @method fillErrors
  * @param {Array} errors Array of errors (push new errors here)
@@ -127,13 +129,18 @@ M.availability_ip.form.fillValue = function(value, node) {
 M.availability_ip.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
-    if (value.custom !== '') {
-        // Ensure the entered value matches our regular expression.
-        // If range notation is used, ensure the end of the range is greater than or equal to the start of the range.
-        var matches = this.ipregex.exec(value.custom);
-        if (matches === null || matches.length === 5 && parseInt(matches[2]) > parseInt(matches[4])) {
-            errors.push('availability_ip:error_custom_ip');
-        }
+    if (value.custom.length > 0) {
+        var regex = this.ipregex;
+        value.custom.every(function(ip) {
+            // Ensure each custom value matches our regular expression.
+            // If range notation is used, ensure the end of the range is greater than or equal to the start of the range.
+            var matches = regex.exec(ip);
+            if (matches === null || matches.length === 5 && parseInt(matches[2]) > parseInt(matches[4])) {
+                errors.push('availability_ip:error_custom_ip');
+                return false; // Do not bother checking any following IPs if an error is encountered.
+            }
+            return true;
+        });
     } else if (value.ids.length === 0) {
         // Neither a custom input was provided, nor a checkbox selected.
         errors.push('availability_ip:error_select_ip');

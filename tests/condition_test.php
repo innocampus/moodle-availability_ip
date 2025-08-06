@@ -57,8 +57,8 @@ class condition_test extends advanced_testcase {
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param array|string $expected An array representing the expected properties of the initialized {@see condition} instance or
-     *                               the class name of the expected error. If the array contains the `customip` key, the instance
-     *                               is expected to have the same value in its `customip` property. If the array contains the
+     *                               the class name of the expected error. If the array contains the `customips` key, the instance
+     *                               is expected to have the same values in its `customips` property. If the array contains the
      *                               `options` key, its value must be an array of associative arrays with the keys `id`, `ip`,
      *                               and `name` that the instances `options` property will be checked against.
      * @param bool $debugging If `true`, a debugging call will be expected.
@@ -78,8 +78,8 @@ class condition_test extends advanced_testcase {
             return;
         }
         $condition = new condition((object) $structure);
-        if (array_key_exists('customip', $expected)) {
-            self::assertSame($expected['customip'], $condition->customip);
+        if (array_key_exists('customips', $expected)) {
+            self::assertSame($expected['customips'], $condition->customips);
         }
         $optionids = array_column($condition->options, 'id');
         $optionips = array_column($condition->options, 'ips');
@@ -115,7 +115,7 @@ class condition_test extends advanced_testcase {
             ],
             'Invalid IP in `custom`' => [
                 'presets' => [],
-                'structure' => ['custom' => '1.2.3.400'],
+                'structure' => ['custom' => ['1.2.3.400']],
                 'expected' => coding_exception::class,
             ],
             'Non-string ID in `ids`' => [
@@ -130,13 +130,13 @@ class condition_test extends advanced_testcase {
                     '127.0.0.1 foo Foo',
                 ],
                 'structure' => ['ids' => ['foo', 'bar']],
-                'expected' => ['customip' => null],
+                'expected' => ['customips' => []],
                 'debugging' => true,
             ],
             'Only a `custom` IP' => [
                 'presets' => [],
-                'structure' => ['custom' => '192.168.0.1'],
-                'expected' => ['customip' => '192.168.0.1'],
+                'structure' => ['custom' => ['192.168.0.1']],
+                'expected' => ['customips' => ['192.168.0.1']],
             ],
             'Valid `ids` and valid `custom`' => [
                 'presets' => [
@@ -145,14 +145,14 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
                 'expected' => [
                     'options' => [
                         ['ips' => ['127.0.0.1'], 'id' => 'foo', 'name' => 'Foo'],
                         ['ips' => ['10.0.0.1'], 'id' => 'bar', 'name' => 'Bar'],
                     ],
-                    'customip' => '192.168.0.1',
+                    'customips' => ['192.168.0.1'],
                 ],
             ],
         ];
@@ -194,7 +194,7 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
                 'expected' => false,
             ],
@@ -206,7 +206,7 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar', 'testing'],
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
                 'expected' => true,
             ],
@@ -218,7 +218,7 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar', 'testing'],
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
                 'expected' => true,
             ],
@@ -229,7 +229,7 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
-                    'custom' => condition::PHPUNIT_CLIENT_IP,
+                    'custom' => [condition::PHPUNIT_CLIENT_IP],
                 ],
                 'expected' => true,
             ],
@@ -304,9 +304,9 @@ class condition_test extends advanced_testcase {
             'Just a custom IP' => [
                 'presets' => [],
                 'structure' => [
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
-                'expected' => ['type' => 'ip', 'custom' => '192.168.0.1'],
+                'expected' => ['type' => 'ip', 'custom' => ['192.168.0.1']],
             ],
             'Just a preset ID' => [
                 'presets' => [
@@ -323,9 +323,9 @@ class condition_test extends advanced_testcase {
                 ],
                 'structure' => [
                     'ids' => ['foo'],
-                    'custom' => '192.168.0.1',
+                    'custom' => ['192.168.0.1'],
                 ],
-                'expected' => ['type' => 'ip', 'ids' => ['foo'], 'custom' => '192.168.0.1'],
+                'expected' => ['type' => 'ip', 'ids' => ['foo'], 'custom' => ['192.168.0.1']],
             ],
         ];
     }

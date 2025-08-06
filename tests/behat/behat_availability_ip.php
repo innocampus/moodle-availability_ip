@@ -95,15 +95,20 @@ class behat_availability_ip extends behat_base {
     /**
      * Sets the custom IP value in the availability form.
      *
-     * @param string $value Either a valid IP address/range or one of the special IP codes (e.g. {@see self::CODE_BEHAT_USER}).
+     * @param string $input Either a valid IP address/range or one of the special IP codes (e.g. {@see self::CODE_BEHAT_USER}).
+     *                      Multiple comma-separated values are also allowed.
      * @throws coding_exception
      *
      * {@noinspection PhpUnused}
      */
     #[Given('I set the custom IP field to :value')]
-    public function i_set_the_custom_ip_field_to(string $value): void {
+    public function i_set_the_custom_ip_field_to(string $input): void {
         $field = behat_field_manager::get_form_field_from_label('-custom-', $this);
-        $field->set_value($this->replace_special_ip_value($value));
+        $values = array_map(
+            fn (string $value): string => $this->replace_special_ip_value(trim($value)),
+            explode(',', $input),
+        );
+        $field->set_value(implode(',', $values));
     }
 
     /**
