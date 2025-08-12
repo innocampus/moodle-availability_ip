@@ -39,8 +39,8 @@ M.availability_ip.form.initInner = function(ipoptions) {
     this.ipoptions = ipoptions;
     // Construct IP address validation RegEx for the custom IP address/range input.
     // We do not capture `0.0.0.0` or `a.b.c.d/0`; using that would render the entire access restriction moot.
-    var firstOctet = /(25[0-5]|2[0-4]\d|[1-9]\d?\d?)/;
-    var otherOctets = /(?:\.(25[0-5]|2[0-4]\d|[1-9]\d?\d?|0)){3}/;
+    var firstOctet = /([1-9]|[1-9]\d|1\d\d|2(?:[0-4]\d|5[0-5]))/;
+    var otherOctets = /(?:\.(\d|[1-9]\d|1\d\d|2(?:[0-4]\d|5[0-5]))){3}/;
     var cidrLengthOrRangeEnd = /(?:\/([1-9]|[12]\d|3[0-2])|-(25[0-5]|2[0-4]\d|[1-9]\d?\d?|0))?/;
     this.ipregex = new RegExp('^' + firstOctet.source + otherOctets.source + cidrLengthOrRangeEnd.source + '$');
     // TODO: Behat tests incoming...
