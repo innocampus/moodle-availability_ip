@@ -78,7 +78,7 @@ class condition extends abstract_condition {
         if (!is_array($ids)) {
             throw new coding_exception("The `ids` property is not an array");
         }
-        $this->customip = $structure->custom ?? null;
+        $this->customip = empty($structure->custom) ? null : $structure->custom;
         if (!is_null($this->customip) && !ip_utils::is_ipv4_address($this->customip) && !ip_utils::is_ipv4_range($this->customip)) {
             throw new coding_exception("Not a valid custom IP address/range: $this->customip");
         }
