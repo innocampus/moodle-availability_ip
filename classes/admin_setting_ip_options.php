@@ -72,7 +72,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
     /**
      * Parses IP options text into an associative array of objects.
      *
-     * @param string $data Text with each line either empty or in the form `<IP> <unique_id> <Arbitrary display name>`.
+     * @param string $data Text with each line either empty or in the form `<IPs> <unique_id> <Arbitrary display name>`.
      *                     See the `ip_option_presets_help` language string for details.
      * @return admin_ip_option[]|string If successful, returns an associative array, where the keys are IDs of the option presets,
      *                                  and the values are instances of {@see admin_ip_option}. Error string otherwise.
@@ -113,7 +113,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
      * Returns the current value of the config setting as an associative array.
      *
      * @param string $plugin Full component name.
-     * @param string $name Name of the config setting`.
+     * @param string $name Name of the config setting.
      * @return admin_ip_option[] Associative array, where the keys are the IDs of the option presets, and the values are instances
      *                           of {@see admin_ip_option}.
      * @throws coding_exception

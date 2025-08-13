@@ -42,26 +42,26 @@ class admin_ip_option_test extends advanced_testcase {
     /**
      * @covers ::__construct
      * @dataProvider test___construct_provider
-     * @param string $ip IP address/range.
+     * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
      * @param string|null $error Error class name, if such an error is to be expected; `null` (default) otherwise.
      * @throws coding_exception
      */
     public function test___construct(
-        string $ip,
+        array $ips,
         string $id,
         string $name,
         string|null $error = null,
     ): void {
         if (is_null($error)) {
-            $option = new admin_ip_option($ip, $id, $name);
-            self::assertSame($ip, $option->ip);
+            $option = new admin_ip_option($ips, $id, $name);
+            self::assertSame($ips, $option->ips);
             self::assertSame($id, $option->id);
             self::assertSame($name, $option->name);
         } else {
             $this->expectException($error);
-            new admin_ip_option($ip, $id, $name);
+            new admin_ip_option($ips, $id, $name);
         }
     }
 
@@ -73,51 +73,56 @@ class admin_ip_option_test extends advanced_testcase {
     public static function test___construct_provider(): array {
         return [
             'Single IPv4 address' => [
-                'ip' => '127.0.0.1',
+                'ips' => ['127.0.0.1'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
             ],
             'IPv4 address range in CIDR notation' => [
-                'ip' => '10.10.10.0/24',
+                'ips' => ['10.10.10.0/24'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
             ],
             'IPv4 address range with hyphen in last octet' => [
-                'ip' => '192.168.0.100-200',
+                'ips' => ['192.168.0.100-200'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
             ],
             'IP address 0.0.0.0' => [
-                'ip' => '0.0.0.0',
+                'ips' => ['0.0.0.0'],
+                'id' => 'foo',
+                'name' => 'Bar Baz',
+            ],
+            'Multiple valid addresses/ranges' => [
+                'ips' => ['127.0.0.1', '10.10.10.0/24', '192.168.0.100-200'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
             ],
             'Invalid IPv4 address' => [
-                'ip' => '1.20.30.400',
+                'ips' => ['1.20.30.400'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
                 'error' => coding_exception::class,
             ],
             'Incomplete IPv4 address' => [
-                'ip' => '10.10.10.',
+                'ips' => ['10.10.10.'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
                 'error' => coding_exception::class,
             ],
             'Invalid CIDR length greater than 32' => [
-                'ip' => '10.10.10.0/33',
+                'ips' => ['10.10.10.0/33'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
                 'error' => coding_exception::class,
             ],
             'Invalid last octet range greater than 255' => [
-                'ip' => '192.168.0.100-256',
+                'ips' => ['192.168.0.100-256'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
                 'error' => coding_exception::class,
             ],
             'Invalid last octet empty range' => [
-                'ip' => '192.168.0.100-90',
+                'ips' => ['192.168.0.100-90'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
                 'error' => coding_exception::class,
@@ -151,7 +156,7 @@ class admin_ip_option_test extends advanced_testcase {
             'Single IPv4 address' => [
                 'line' => '127.0.0.1 foo Bar Baz',
                 'expected' => [
-                    'ip' => '127.0.0.1',
+                    'ips' => ['127.0.0.1'],
                     'id' => 'foo',
                     'name' => 'Bar Baz',
                 ],
@@ -159,7 +164,7 @@ class admin_ip_option_test extends advanced_testcase {
             'Single IPv4 address and lots of whitespace' => [
                 'line' => '   127.0.0.1    foo    Bar Baz     ',
                 'expected' => [
-                    'ip' => '127.0.0.1',
+                    'ips' => ['127.0.0.1'],
                     'id' => 'foo',
                     'name' => 'Bar Baz',
                 ],
@@ -167,7 +172,7 @@ class admin_ip_option_test extends advanced_testcase {
             'IPv4 address range in CIDR notation' => [
                 'line' => '10.10.10.0/24 foo Bar Baz',
                 'expected' => [
-                    'ip' => '10.10.10.0/24',
+                    'ips' => ['10.10.10.0/24'],
                     'id' => 'foo',
                     'name' => 'Bar Baz',
                 ],
@@ -175,7 +180,15 @@ class admin_ip_option_test extends advanced_testcase {
             'IPv4 address range with hyphen in last octet' => [
                 'line' => '192.168.0.100-200 foo Bar Baz',
                 'expected' => [
-                    'ip' => '192.168.0.100-200',
+                    'ips' => ['192.168.0.100-200'],
+                    'id' => 'foo',
+                    'name' => 'Bar Baz',
+                ],
+            ],
+            'Multiple valid IPv4 addresses/ranges' => [
+                'line' => '127.0.0.1,10.10.10.0/24,192.168.0.100-200 foo Bar Baz',
+                'expected' => [
+                    'ips' => ['127.0.0.1', '10.10.10.0/24', '192.168.0.100-200'],
                     'id' => 'foo',
                     'name' => 'Bar Baz',
                 ],

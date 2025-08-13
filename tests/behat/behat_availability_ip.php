@@ -54,9 +54,9 @@ class behat_availability_ip extends behat_base {
      * Sets the `ip_option_presets` config value to the provided options.
      *
      * @Given /^the following IP option presets exist:$/
-     * @param TableNode $data Table with the columns `ip`, `id`, and `name`.
+     * @param TableNode $data Table with the columns `ips`, `id`, and `name`.
      *                        These will be validated by the {@see admin_ip_option} constructor.
-     *                        Special IP codes (e.g. {@see self::CODE_BEHAT_USER}) can be passed in the `ip` column as well.
+     *                        Special IP codes (e.g. {@see self::CODE_BEHAT_USER}) can be passed in the `ips` column as well.
      * @throws coding_exception The table was missing the required columns, or the session IP could not be determined.
      *
      * {@noinspection PhpUnused}
@@ -64,11 +64,14 @@ class behat_availability_ip extends behat_base {
     public function the_following_ip_option_presets_exist(TableNode $data): void {
         $options = [];
         foreach ($data->getColumnsHash() as $item) {
-            if ($diff = array_diff_key(array_flip(['ip', 'id', 'name']), $item)) {
+            if ($diff = array_diff_key(array_flip(['ips', 'id', 'name']), $item)) {
                 throw new coding_exception("Missing columns: " . implode(', ', $diff));
             }
             $options[] = new admin_ip_option(
-                ip: $this->replace_special_ip_value($item['ip']),
+                ips: array_map(
+                    [$this, 'replace_special_ip_value'],
+                    array_filter(explode(',', $item['ips'])),
+                ),
                 id: $item['id'],
                 name: $item['name'],
             );

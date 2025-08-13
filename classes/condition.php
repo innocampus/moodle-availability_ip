@@ -105,7 +105,7 @@ class condition extends abstract_condition {
         // If the client IP matches at least one of the IP addresses/ranges, then the availability condition is satisfied.
         // When the condition is inverted (`$not === true`), at least one match means it is not satisfied.
         foreach ($this->options as $option) {
-            if (address_in_subnet($clientip, $option->ip)) {
+            if (address_in_subnet($clientip, implode(',', $option->ips))) {
                 return !$not;
             }
         }

@@ -37,25 +37,27 @@ use core\ip_utils;
 final class admin_ip_option {
 
     /**
-     * @param string $ip IP address/range.
+     * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
-     * @throws coding_exception The `$ìp` argument is not a valid ip address/range.
+     * @throws coding_exception One of the provided `$ìps` is not a valid IP address/range.
      */
     public function __construct(
-        public readonly string $ip,
+        public readonly array $ips,
         public readonly string $id,
         public readonly string $name,
     ) {
-        if (!ip_utils::is_ipv4_address($ip) && !ip_utils::is_ipv4_range($ip)) {
-            throw new coding_exception("Not a valid IP address/range: $ip");
+        foreach ($this->ips as $ip) {
+            if (!ip_utils::is_ipv4_address($ip) && !ip_utils::is_ipv4_range($ip)) {
+                throw new coding_exception("Not a valid IP address/range: $ip");
+            }
         }
     }
 
     /**
      * Parses an IP option string into an object.
      *
-     * @param string $line String in the form `<IP> <unique_id> <Arbitrary display name>`.
+     * @param string $line String in the form `<IPs> <unique_id> <Arbitrary display name>`.
      *                     See the `ip_option_presets_help` language string for details.
      * @return self|null New instance, if successful. `null` otherwise.
      */
@@ -63,9 +65,13 @@ final class admin_ip_option {
         if (!preg_match('/^(\S+)\s+([a-z_]+)\s+(.+)$/', trim($line), $matches)) {
             return null;
         }
-        [, $ip, $id, $name] = $matches;
+        [, $ips, $id, $name] = $matches;
         try {
-            return new self($ip, $id, $name);
+            return new self(
+                ips: array_values(array_filter(explode(',', $ips))),
+                id: $id,
+                name: $name,
+            );
         } catch (coding_exception) {
             return null;
         }
@@ -76,9 +82,9 @@ final class admin_ip_option {
      *
      * Inverse to {@see parse}.
      *
-     * @return string String in the form `<IP> <unique_id> <Arbitrary display name>`.
+     * @return string String in the form `<IPs> <unique_id> <Arbitrary display name>`.
      */
     public function __toString(): string {
-        return implode(' ', [$this->ip, $this->id, $this->name]);
+        return implode(' ', [implode(',', $this->ips), $this->id, $this->name]);
     }
 }

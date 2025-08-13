@@ -195,10 +195,10 @@ class admin_setting_ip_options_test extends advanced_testcase {
                 'expected' => [],
             ],
             'Single valid line' => [
-                'data' => '127.0.0.1 localhost Local machine',
+                'data' => '127.0.0.1,10.10.10.0/24,192.168.0.100-200 localhost Local machine',
                 'expected' => [
                     'localhost' => [
-                        'ip' => '127.0.0.1',
+                        'ips' => ['127.0.0.1', '10.10.10.0/24', '192.168.0.100-200'],
                         'id' => 'localhost',
                         'name' => 'Local machine',
                     ],
@@ -211,12 +211,12 @@ class admin_setting_ip_options_test extends advanced_testcase {
                 ",
                 'expected' => [
                     'localhost' => [
-                        'ip' => '127.0.0.1',
+                        'ips' => ['127.0.0.1'],
                         'id' => 'localhost',
                         'name' => 'Local machine',
                     ],
                     'docker_network' => [
-                        'ip' => '172.18.0.0/16',
+                        'ips' => ['172.18.0.0/16'],
                         'id' => 'docker_network',
                         'name' => 'Moodle Docker network',
                     ],

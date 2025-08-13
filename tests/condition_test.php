@@ -67,7 +67,11 @@ class condition_test extends advanced_testcase {
      */
     public function test___construct(array $presets, array $structure, array|string $expected, bool $debugging = false): void {
         $this->resetAfterTest();
-        self::configure_ip_option_presets($presets);
+        set_config(
+            name: 'ip_option_presets',
+            value: implode("\n", $presets),
+            plugin: 'availability_ip',
+        );
         if (is_string($expected)) {
             $this->expectException($expected);
             new condition((object) $structure);
@@ -78,12 +82,12 @@ class condition_test extends advanced_testcase {
             self::assertSame($expected['customip'], $condition->customip);
         }
         $optionids = array_column($condition->options, 'id');
-        $optionips = array_column($condition->options, 'ip');
+        $optionips = array_column($condition->options, 'ips');
         $optionnames = array_column($condition->options, 'name');
         if (array_key_exists('options', $expected)) {
             foreach ($expected['options'] as $option) {
                 self::assertContains($option['id'], $optionids);
-                self::assertContains($option['ip'], $optionips);
+                self::assertContains($option['ips'], $optionips);
                 self::assertContains($option['name'], $optionnames);
             }
         }
@@ -116,14 +120,14 @@ class condition_test extends advanced_testcase {
             ],
             'Non-string ID in `ids`' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    '127.0.0.1 foo Foo',
                 ],
                 'structure' => ['ids' => ['foo', 3.14]],
                 'expected' => coding_exception::class,
             ],
             'No option preset matches one of the IDs in `ids`' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    '127.0.0.1 foo Foo',
                 ],
                 'structure' => ['ids' => ['foo', 'bar']],
                 'expected' => ['customip' => null],
@@ -136,8 +140,8 @@ class condition_test extends advanced_testcase {
             ],
             'Valid `ids` and valid `custom`' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    '127.0.0.1 foo Foo',
+                    '10.0.0.1  bar Bar',
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
@@ -145,8 +149,8 @@ class condition_test extends advanced_testcase {
                 ],
                 'expected' => [
                     'options' => [
-                        ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                        ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                        ['ips' => ['127.0.0.1'], 'id' => 'foo', 'name' => 'Foo'],
+                        ['ips' => ['10.0.0.1'], 'id' => 'bar', 'name' => 'Bar'],
                     ],
                     'customip' => '192.168.0.1',
                 ],
@@ -164,7 +168,11 @@ class condition_test extends advanced_testcase {
      */
     public function test_is_available(array $presets, array $structure, bool $expected): void {
         $this->resetAfterTest();
-        self::configure_ip_option_presets($presets);
+        set_config(
+            name: 'ip_option_presets',
+            value: implode("\n", $presets),
+            plugin: 'availability_ip',
+        );
         $condition = new condition((object) $structure);
         $user = $this->getDataGenerator()->create_user();
         $info = new mock_info();
@@ -181,8 +189,8 @@ class condition_test extends advanced_testcase {
         return [
             'IP neither matches an admin option preset nor the custom range' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    '127.0.0.1 foo Foo',
+                    '10.0.0.1  bar Bar',
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
@@ -192,9 +200,9 @@ class condition_test extends advanced_testcase {
             ],
             'IP matches an admin option exactly' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
-                    ['ip' => condition::PHPUNIT_CLIENT_IP, 'id' => 'testing', 'name' => 'Testing'],
+                    '127.0.0.1 foo Foo',
+                    '10.0.0.1  bar Bar',
+                    condition::PHPUNIT_CLIENT_IP . ' testing Testing',
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar', 'testing'],
@@ -204,9 +212,9 @@ class condition_test extends advanced_testcase {
             ],
             'IP falls in an admin option range' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
-                    ['ip' => condition::PHPUNIT_CLIENT_IP . '-255', 'id' => 'testing', 'name' => 'Testing'],
+                    '127.0.0.1 foo Foo',
+                    '10.0.0.1  bar Bar',
+                    condition::PHPUNIT_CLIENT_IP . '-255 testing Testing',
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar', 'testing'],
@@ -216,8 +224,8 @@ class condition_test extends advanced_testcase {
             ],
             'IP matches custom setting exactly' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
-                    ['ip' => '10.0.0.1', 'id' => 'bar', 'name' => 'Bar'],
+                    '127.0.0.1 foo Foo',
+                    '10.0.0.1  bar Bar',
                 ],
                 'structure' => [
                     'ids' => ['foo', 'bar'],
@@ -277,7 +285,11 @@ class condition_test extends advanced_testcase {
      */
     public function test_save(array $presets, array $structure, array $expected): void {
         $this->resetAfterTest();
-        self::configure_ip_option_presets($presets);
+        set_config(
+            name: 'ip_option_presets',
+            value: implode("\n", $presets),
+            plugin: 'availability_ip',
+        );
         $condition = new condition((object) $structure);
         self::assertEquals((object) $expected, $condition->save());
     }
@@ -298,7 +310,7 @@ class condition_test extends advanced_testcase {
             ],
             'Just a preset ID' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    '127.0.0.1 foo Foo',
                 ],
                 'structure' => [
                     'ids' => ['foo'],
@@ -307,7 +319,7 @@ class condition_test extends advanced_testcase {
             ],
             'Both a preset ID and a custom IP' => [
                 'presets' => [
-                    ['ip' => '127.0.0.1', 'id' => 'foo', 'name' => 'Foo'],
+                    '127.0.0.1 foo Foo',
                 ],
                 'structure' => [
                     'ids' => ['foo'],
@@ -316,18 +328,5 @@ class condition_test extends advanced_testcase {
                 'expected' => ['type' => 'ip', 'ids' => ['foo'], 'custom' => '192.168.0.1'],
             ],
         ];
-    }
-
-    private static function configure_ip_option_presets(array $presets): void {
-        $presetsstring = array_reduce(
-            array: $presets,
-            callback: fn (string $carry, array $preset): string => $carry . implode(' ', $preset) . "\n",
-            initial: '',
-        );
-        set_config(
-            name: 'ip_option_presets',
-            value: $presetsstring,
-            plugin: 'availability_ip',
-        );
     }
 }

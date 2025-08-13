@@ -18,7 +18,7 @@ Feature: Setting availability conditions for a course module.
       | page     | C1     | P1    |
     # See `behat_availability_ip` class for the meaning of the special IP values.
     And the following IP option presets exist:
-      | ip                  | id        | name             |
+      | ips                 | id        | name             |
       | 127.0.0.1           | localhost | Local machine    |
       | <behat_user>        | me        | Current IP       |
       | <behat_user_range>  | me_range  | Current IP range |
