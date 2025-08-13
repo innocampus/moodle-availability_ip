@@ -70,4 +70,15 @@ final class admin_ip_option {
             return null;
         }
     }
+
+    /**
+     * Returns an IP option string from the object.
+     *
+     * Inverse to {@see parse}.
+     *
+     * @return string String in the form `<IP> <unique_id> <Arbitrary display name>`.
+     */
+    public function __toString(): string {
+        return implode(' ', [$this->ip, $this->id, $this->name]);
+    }
 }
