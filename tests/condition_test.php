@@ -28,7 +28,6 @@ namespace availability_ip;
 
 use advanced_testcase;
 use core\exception\coding_exception;
-use core\lang_string;
 use core_availability\mock_info;
 use dml_exception;
 use moodle_exception;
@@ -237,7 +236,7 @@ class condition_test extends advanced_testcase {
     public function test_get_description(): void {
         $condition = new condition((object) ['ids' => []]);
         $info = new mock_info();
-        $expected = new lang_string('condition_description', 'availability_ip');
+        $expected = get_string('condition_description', 'availability_ip');
         self::assertEquals($expected, $condition->get_description(full: false, not: false, info: $info));
         self::assertEquals($expected, $condition->get_description(full: false, not: true, info: $info));
         self::assertEquals($expected, $condition->get_description(full: true, not: false, info: $info));
