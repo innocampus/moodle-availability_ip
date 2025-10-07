@@ -62,10 +62,11 @@ class behat_availability_ip extends behat_base {
      * {@noinspection PhpUnused}
      */
     public function the_following_ip_option_presets_exist(TableNode $data): void {
+        $columns = ['ips', 'id', 'name'];
         $options = [];
         foreach ($data->getColumnsHash() as $item) {
-            if ($diff = array_diff_key(array_flip(['ips', 'id', 'name']), $item)) {
-                throw new coding_exception("Missing columns: " . implode(', ', $diff));
+            if ($diff = array_diff($columns, array_flip($item))) {
+                throw new coding_exception('Missing columns: ' . implode(', ', $diff));
             }
             $options[] = new admin_ip_option(
                 ips: array_map(
