@@ -3,16 +3,18 @@ Feature: Setting availability conditions for a course module.
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | format | enablecompletion |
-      | Course 1 | C1        | topics | 1                |
+      | fullname | shortname | format | summary | enablecompletion |
+      | Course 1 | C1        | topics | Foo bar | 1                |
     And the following "users" exist:
-      | username |
-      | teacher1 |
-      | student1 |
+      | username | email                |
+      | teacher1 | teacher1@example.com |
+      | student1 | student1@example.com |
+      | student2 | student2@example.com |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
+      | student2 | C1     | student        |
     And the following "activities" exist:
       | activity | course | name  |
       | page     | C1     | P1    |
@@ -161,3 +163,28 @@ Feature: Setting availability conditions for a course module.
       | <behat_user_range>  | should not           |
       | <behat_user_cidr>   | should not           |
       | <not_behat_user>    | should               |
+
+  Scenario: IP is combined with another availability condition.
+    Given I am on the "P1" "page activity editing" page logged in as "teacher1"
+    And I expand all fieldsets
+    # First add an IP restriction.
+    And I click on "Add restriction..." "button"
+    And I click on "IP" "button"
+    Then I should see a warning badge with "No IP address/range selected."
+    When I click on "me" "checkbox"
+    Then I should not see "No IP address/range selected."
+    # Next add an Email address restriction.
+    And I click on "Add restriction..." "button"
+    # Fun fact: Because the previous steps leave an invisible zombie restriction dialogue in the DOM,
+    # the following step will fail, without the ` in the "Add restriction..." "dialogue"` at the end.
+    And I click on "User profile" "button" in the "Add restriction..." "dialogue"
+    And I set the field "User profile field" to "Email address"
+    And I set the field "Value to compare against" to "student2@example.com"
+    And I click on "Save and return to course" "button"
+    # Log in as student1. Module should be unavailable.
+    Given I am on the "Course 1" "course" page logged in as "student1"
+    Then I should see "Not available"
+    # Log in as student2. Now it should be available.
+    Given I am on the "Course 1" "course" page logged in as "student2"
+    When I follow "P1"
+    Then I should see "Test page content"
