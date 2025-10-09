@@ -25,7 +25,7 @@ Feature: Setting availability conditions for a course module.
       | <behat_user_cidr>   | me_cidr   | Current IP CIDR  |
       | <not_behat_user>    | not_me    | Different IP     |
 
-  Scenario: Seeing the expected OP option presets.
+  Scenario: Seeing the expected IP option presets.
     # Open the IP availability restriction form.
     Given I am on the "P1" "page activity editing" page logged in as "teacher1"
     And I expand all fieldsets
@@ -33,12 +33,12 @@ Feature: Setting availability conditions for a course module.
     Then "IP" "button" should exist in the "Add restriction..." "dialogue"
     When I click on "IP" "button"
     # Check that all option presets defined above are visible.
-    Then I should see "No IP address/range selected." in the ".bg-warning" "css_element"
-    And I should see "Local machine" in the "//label[@for='localhost']" "xpath_element"
-    And I should see "Current IP" in the "//label[@for='me']" "xpath_element"
-    And I should see "Current IP range" in the "//label[@for='me_range']" "xpath_element"
-    And I should see "Current IP CIDR" in the "//label[@for='me_cidr']" "xpath_element"
-    And I should see "Different IP" in the "//label[@for='not_me']" "xpath_element"
+    Then I should see a warning badge with "No IP address/range selected."
+    And I should see a checkbox labeled "Local machine"
+    And I should see a checkbox labeled "Current IP"
+    And I should see a checkbox labeled "Current IP range"
+    And I should see a checkbox labeled "Current IP CIDR"
+    And I should see a checkbox labeled "Different IP"
 
   Scenario: Entering custom IP values.
     # This is not done as a scenario outline because running one scenario per input would take way too long.
@@ -48,38 +48,38 @@ Feature: Setting availability conditions for a course module.
     And I click on "Add restriction..." "button"
     Then "IP" "button" should exist in the "Add restriction..." "dialogue"
     When I click on "IP" "button"
-    Then I should see "No IP address/range selected." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "No IP address/range selected."
     When I click on "localhost" "checkbox"
     Then I should not see "No IP address/range selected."
 
     # These should all be invalid inputs.
     # Arbitrary string.
     When I set the custom IP field to "foo"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # Missing last octet.
     When I set the custom IP field to "127.0.0"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # Last number greater than 255.
     When I set the custom IP field to "127.0.0.256"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # Number with leading zero.
     When I set the custom IP field to "127.0.0.01"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # CIDR suffix is 0.
     When I set the custom IP field to "1.2.3.4/0"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # CIDR suffix is greater than 32.
     When I set the custom IP field to "1.2.3.4/33"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # Last octet range is empty (i.e. start greater than end).
     When I set the custom IP field to "1.2.3.40-39"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # First octet is 0.
     When I set the custom IP field to "0.1.2.3"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
     # All zeros.
     When I set the custom IP field to "0.0.0.0"
-    Then I should see "Invalid IP address entered." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "Invalid IP address entered."
 
     # These should all be valid inputs.
     When I set the custom IP field to "1.0.0.0"
@@ -103,7 +103,7 @@ Feature: Setting availability conditions for a course module.
     And I expand all fieldsets
     And I click on "Add restriction..." "button"
     And I click on "IP" "button"
-    Then I should see "No IP address/range selected." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "No IP address/range selected."
     When I click on "not_me" "checkbox"
     Then I should not see "No IP address/range selected."
     And I click on "Save and return to course" "button"
@@ -119,7 +119,7 @@ Feature: Setting availability conditions for a course module.
     And I expand all fieldsets
     And I click on "Add restriction..." "button"
     And I click on "IP" "button"
-    Then I should see "No IP address/range selected." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "No IP address/range selected."
     When I click on "<id>" "checkbox"
     And I click on "not_me" "checkbox"
     Then I should not see "No IP address/range selected."
@@ -144,7 +144,7 @@ Feature: Setting availability conditions for a course module.
     And I expand all fieldsets
     And I click on "Add restriction..." "button"
     And I click on "IP" "button"
-    Then I should see "No IP address/range selected." in the ".bg-warning" "css_element"
+    Then I should see a warning badge with "No IP address/range selected."
     When I click on "not_me" "checkbox"
     And I set the custom IP field to "<ip>"
     Then I should not see "No IP address/range selected."
