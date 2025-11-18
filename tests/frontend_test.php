@@ -28,23 +28,23 @@ namespace availability_ip;
 
 use advanced_testcase;
 use stdClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the {@see frontend} class.
  *
- * @coversDefaultClass \availability_ip\frontend
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(frontend::class)]
 class frontend_test extends advanced_testcase {
 
     /**
-     * @covers ::get_javascript_init_params
-     * @dataProvider test_get_javascript_init_params_provider
-     *
      * {@noinspection PhpUndefinedMethodInspection}
      */
+    #[DataProvider('test_get_javascript_init_params_provider')]
     public function test_get_javascript_init_params(string|null $config, array $expected): void {
         if (!is_null($config)) {
             $this->resetAfterTest();
@@ -82,8 +82,6 @@ class frontend_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::get_javascript_strings
-     *
      * {@noinspection PhpUndefinedMethodInspection}
      */
     public function test_get_javascript_strings(): void {

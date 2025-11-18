@@ -28,26 +28,27 @@ namespace availability_ip;
 
 use advanced_testcase;
 use core\exception\coding_exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the {@see admin_ip_option} class.
  *
- * @coversDefaultClass \availability_ip\admin_ip_option
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(admin_ip_option::class)]
 class admin_ip_option_test extends advanced_testcase {
 
     /**
-     * @covers ::__construct
-     * @dataProvider test___construct_provider
      * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
      * @param string|null $error Error class name, if such an error is to be expected; `null` (default) otherwise.
      * @throws coding_exception
      */
+    #[DataProvider('test___construct_provider')]
     public function test___construct(
         array $ips,
         string $id,
@@ -131,11 +132,10 @@ class admin_ip_option_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::parse
      * @param string $line Input for the method.
      * @param array|null $expected Expected properties on the returned object or `null` if `null` is expected to be returned.
-     * @dataProvider test_parse_provider
      */
+    #[DataProvider('test_parse_provider')]
     public function test_parse(string $line, array|null $expected): void {
         $option = admin_ip_option::parse($line);
         if (is_null($expected)) {

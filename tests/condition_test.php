@@ -30,16 +30,17 @@ use advanced_testcase;
 use core\exception\coding_exception;
 use core_availability\mock_info;
 use dml_exception;
-use moodle_exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the {@see condition} class.
  *
- * @coversDefaultClass \availability_ip\condition
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(condition::class)]
 class condition_test extends advanced_testcase {
 
     /**
@@ -52,8 +53,6 @@ class condition_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::__construct
-     * @dataProvider test___construct_provider
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param array|string $expected An array representing the expected properties of the initialized {@see condition} instance or
@@ -65,6 +64,7 @@ class condition_test extends advanced_testcase {
      * @throws coding_exception
      * @throws dml_exception
      */
+    #[DataProvider('test___construct_provider')]
     public function test___construct(array $presets, array $structure, array|string $expected, bool $debugging = false): void {
         $this->resetAfterTest();
         set_config(
@@ -159,13 +159,13 @@ class condition_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::is_available
-     * @dataProvider test_is_available_provider
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param bool $expected Whether we expect the test module to be available to the user.
-     * @throws moodle_exception
+     * @throws coding_exception
+     * @throws dml_exception
      */
+    #[DataProvider('test_is_available_provider')]
     public function test_is_available(array $presets, array $structure, bool $expected): void {
         $this->resetAfterTest();
         set_config(
@@ -237,7 +237,6 @@ class condition_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::get_description
      * @throws coding_exception
      * @throws dml_exception
      */
@@ -252,8 +251,6 @@ class condition_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::get_debug_string
-     *
      * {@noinspection PhpUndefinedMethodInspection}
      */
     public function test_get_debug_string(): void {
@@ -275,14 +272,13 @@ class condition_test extends advanced_testcase {
     }
 
     /**
-     * @covers ::save
-     * @dataProvider test_save_provider
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param array $expected Expected properties on the returned object.
      * @throws coding_exception
      * @throws dml_exception
      */
+    #[DataProvider('test_save_provider')]
     public function test_save(array $presets, array $structure, array $expected): void {
         $this->resetAfterTest();
         set_config(

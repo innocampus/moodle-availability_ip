@@ -31,6 +31,8 @@ use availability_date\condition as date_condition;
 use core_availability\tree;
 use dml_exception;
 use JsonException;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the `upgradelib.php` functions.
@@ -39,6 +41,8 @@ use JsonException;
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversFunction('replace_custom_single_ips_with_arrays')]
+#[CoversFunction('replace_custom_single_ip_with_array')]
 class upgradelib_test extends advanced_testcase {
     public static function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
@@ -46,16 +50,13 @@ class upgradelib_test extends advanced_testcase {
     }
 
     /**
-     *
-     * @covers ::replace_custom_single_ips_with_arrays
-     * @covers ::replace_custom_single_ip_with_array
-     * @dataProvider test_replace_custom_single_ips_with_arrays_provider
      * @param string $module Type of module to create (e.g. `page` or `forum`).
      * @param array $initial Conditions to set for the module initially.
      * @param array $expected Conditions expected to be set after the replacement function was called.
      * @throws dml_exception
      * @throws JsonException
      */
+    #[DataProvider('test_replace_custom_single_ips_with_arrays_provider')]
     public function test_replace_custom_single_ips_with_arrays(string $module, array $initial, array $expected): void {
         global $DB;
         $this->resetAfterTest();
