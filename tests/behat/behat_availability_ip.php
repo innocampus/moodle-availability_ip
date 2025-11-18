@@ -170,7 +170,7 @@ class behat_availability_ip extends behat_base {
     #[Then('I should see a checkbox labeled :label')]
     #[Then('I should see a checkbox labeled :label for the input :inputname')]
     public function i_should_see_a_checkbox_labeled(string $label, string|null $inputname = null): void {
-        $labelpredicate = "text()='$label'";
+        $labelpredicate = "starts-with(text(), '$label')";
         if (!is_null($inputname)) {
             $labelpredicate .= " and @for='$inputname'";
         }

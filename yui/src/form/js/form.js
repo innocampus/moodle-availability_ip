@@ -41,7 +41,6 @@ M.availability_ip.form.initInner = function(ipoptions) {
     var otherOctets = /(?:\.(\d|[1-9]\d|1\d\d|2(?:[0-4]\d|5[0-5]))){3}/;
     var cidrLengthOrRangeEnd = /(?:\/([1-9]|[12]\d|3[0-2])|-(25[0-5]|2[0-4]\d|[1-9]\d?\d?|0))?/;
     this.ipregex = new RegExp('^' + firstOctet.source + otherOctets.source + cidrLengthOrRangeEnd.source + '$');
-    // TODO: Behat tests incoming...
 };
 
 /**
@@ -57,14 +56,29 @@ M.availability_ip.form.getNode = function(json) {
     var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
         var checkedAttr = initialValues.includes(option.id) ? ' checked' : '';
+        var ips = option.ips.join(', ');
         html += '<div class="form-check">' +
                 '<input class="form-check-input" type="checkbox" value="" id="' + option.id + '"' + checkedAttr + '>' +
-                '<label class="form-check-label" for="' + option.id + '">' + option.name + '</label>' +
+                '<label class="form-check-label" for="' + option.id + '">' +
+                option.name + ' <small class="text-muted">(' + ips + ')</small>' +
+                '</label>' +
                 '</div>';
     });
-    var customValue = json.custom !== undefined ? json.custom.join(', ') : '';
-    html += '<div class="mt-2">' +
-            '<label class="form-label" for="-custom-">' + M.util.get_string('custom_ip', 'availability_ip') + '</label>' +
+    var customValue = '';
+    var customChecked = '';
+    var customHidden = ' hidden';
+    if (json.custom !== undefined && json.custom.length > 0) {
+        customValue = json.custom.join(', ');
+        customChecked = ' checked';
+        customHidden = '';
+    }
+    html += '<div class="form-check">' +
+            '<input class="form-check-input" type="checkbox" value="" id="-custom-check-"' + customChecked + '>' +
+            '<label class="form-check-label" for="-custom-check-">' +
+            M.util.get_string('custom_ip', 'availability_ip') +
+            '</label>' +
+            '</div>';
+    html += '<div id="-custom-container-" class="mt-2"' + customHidden + '>' +
             '<input id="-custom-" ' +
                    'type="text" ' +
                    'value="' + customValue + '" ' +
@@ -76,14 +90,27 @@ M.availability_ip.form.getNode = function(json) {
             '</div>';
     html += '</span></label>';
     var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
+    var customContainerNode = node.one('div[id="-custom-container-"]');
     // Add event handlers for when a checkbox is ticked (`change`) or custom input changes (`input`).
     if (!M.availability_ip.form.addedEvents) {
         M.availability_ip.form.addedEvents = true;
         var container = Y.one('.availability-field');
-        container.delegate(['change', 'input'], function() {
-            // Update the form fields.
-            M.core_availability.form.update();
-        }, '.availability_ip input');
+        container.delegate(
+            ['change', 'input'],
+            function(event) {
+                // Update the form fields.
+                M.core_availability.form.update();
+                // Show/hide custom IP input field.
+                if (event.type === 'change' && event.target.get('id') === '-custom-check-') {
+                    if (event.target.get('checked')) {
+                        customContainerNode.show();
+                    } else {
+                        customContainerNode.hide();
+                    }
+                }
+            },
+            '.availability_ip input'
+        );
     }
     return node;
 };
@@ -100,17 +127,23 @@ M.availability_ip.form.getNode = function(json) {
  * @param {Y.Node} node YUI node (same one returned from getNode)
  */
 M.availability_ip.form.fillValue = function(value, node) {
-    // Collect values from all selected checkboxes.
+    // Collect values from all selected checkboxes (excluding the "custom" checkbox).
     value.ids = [];
     node.one('span[id=availability_ip-options]').all('input').each(function(input) {
-        if (input.get('checked')) {
-            value.ids.push(input.get('id'));
+        var id = input.get('id');
+        if (id !== '-custom-check-' && input.get('checked')) {
+            value.ids.push(id);
         }
     });
-    // Get custom ip addresses/ranges (comma-separated).
-    var customInput = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
-    // Split into an array and filter out empty strings.
-    value.custom = customInput.split(/\s*,\s*/).filter(Boolean);
+    // If the custom checkbox is selected, get custom IP addresses/ranges (comma-separated) from the input field.
+    // If it is not selected, ignore the text input.
+    if (node.one('input[id="-custom-check-"]').get('checked')) {
+        var customInputText = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
+        // Split into an array and filter out empty strings.
+        value.custom = customInputText.split(/\s*,\s*/).filter(Boolean);
+    } else {
+        value.custom = [];
+    }
 };
 
 /**
@@ -145,4 +178,7 @@ M.availability_ip.form.fillErrors = function(errors, node) {
         // Neither a custom input was provided, nor a checkbox selected.
         errors.push('availability_ip:error_select_ip');
     }
+    // TODO: Unfortunately the Moodle code handling the errors array is poorly implemented.
+    //       If there was one error previously and there is a _different_ one now, the old one is still displayed.
+    //       Whether this is worth fixing depends on how long YUI is expected to be kept on life support...
 };

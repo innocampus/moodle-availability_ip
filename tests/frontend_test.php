@@ -42,6 +42,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 class frontend_test extends advanced_testcase {
 
     /**
+     * @param string|null $config Value for the `ip_option_presets` config to set.
+     * @param array[] $expected IP options (as associative arrays) expected as the first and only element in the returned array.
      * {@noinspection PhpUndefinedMethodInspection}
      */
     #[DataProvider('test_get_javascript_init_params_provider')]
@@ -57,7 +59,9 @@ class frontend_test extends advanced_testcase {
         // Simple closure binding workaround to test the protected method.
         $closure = function(): array { return $this->get_javascript_init_params(new stdClass()); };
         $output = $closure->call($frontend);
-        self::assertSame($expected, $output);
+        self::assertCount(1, $output);
+        $options = array_map(fn (admin_ip_option $option): array => (array) $option, $output[0]);
+        self::assertEquals($expected, $options);
     }
 
     /**
@@ -69,14 +73,14 @@ class frontend_test extends advanced_testcase {
         return [
             'No preset options' => [
                 'config' => null,
-                'expected' => [[]],
+                'expected' => [],
             ],
             'A few preset options' => [
                 'config' => "1.0.0.0 foo Foo\n1.1.1.1 bar Bar",
-                'expected' => [[
-                    ['id' => 'foo', 'name' => 'Foo'],
-                    ['id' => 'bar', 'name' => 'Bar'],
-                ]],
+                'expected' => [
+                    ['ips' => ['1.0.0.0'], 'id' => 'foo', 'name' => 'Foo'],
+                    ['ips' => ['1.1.1.1'], 'id' => 'bar', 'name' => 'Bar'],
+                ],
             ],
         ];
     }

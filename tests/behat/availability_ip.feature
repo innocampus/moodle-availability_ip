@@ -50,7 +50,14 @@ Feature: Setting availability conditions for a course module.
     And I click on "Add restriction..." "button"
     Then "IP" "button" should exist in the "Add restriction..." "dialogue"
     When I click on "IP" "button"
-    Then I should see a warning badge with "No IP address/range selected."
+    # The custom input field and associated help text should not be visible by default, only once the checkbox is selected.
+    Then "-custom-" "field" should not be visible
+    And I should not see "Input must either be a full IP address"
+    When I click on "-custom-check-" "checkbox"
+    Then "-custom-" "field" should be visible
+    And I should see "Input must either be a full IP address"
+    # The following warning badge should remain visible, as long as only the custom checkbox is selected, but no input has been entered.
+    And I should see a warning badge with "No IP address/range selected."
     When I click on "localhost" "checkbox"
     Then I should not see "No IP address/range selected."
 
@@ -153,6 +160,7 @@ Feature: Setting availability conditions for a course module.
     And I click on "IP" "button"
     Then I should see a warning badge with "No IP address/range selected."
     When I click on "not_me" "checkbox"
+    When I click on "-custom-check-" "checkbox"
     And I set the custom IP field to "<ip>"
     Then I should not see "No IP address/range selected."
     And I should not see "Invalid IP address entered."

@@ -58,12 +58,7 @@ class frontend extends abstract_frontend {
     protected function get_javascript_init_params($course, cm_info|null $cm = null, section_info|null $section = null): array {
         $optionpresets = admin_setting_ip_options::get_parsed('availability_ip', 'ip_option_presets');
         // Do not show the actual IP ranges to the client.
-        return [
-            array_map(
-                fn (admin_ip_option $option): array => ['id' => $option->id, 'name' => $option->name],
-                array_values($optionpresets),
-            )
-        ];
+        return [array_values($optionpresets)];
     }
 
     protected function get_javascript_strings(): array {
