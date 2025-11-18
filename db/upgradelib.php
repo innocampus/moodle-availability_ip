@@ -52,9 +52,10 @@ function replace_custom_single_ips_with_arrays(): void {
             $transaction->rollback($e);
         }
         throw $e;
-    }
     // @codeCoverageIgnoreEnd
-    $recordset->close();
+    } finally {
+        $recordset->close();
+    }
 }
 
 /**
