@@ -54,14 +54,14 @@ M.availability_ip.form.initInner = function(ipoptions) {
 M.availability_ip.form.getNode = function(json) {
     // TODO: See if we can use a template instead.
     var html = '<label><span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
-               '<span class="availability-group" id="availability_ip-options">';
+               '<span class="availability-group availability_ip-options">';
     var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
         var checkedAttr = initialValues.includes(option.id) ? ' checked' : '';
         var ips = option.ips.join(', ');
         html += '<div class="form-check">' +
-                '<input class="form-check-input" type="checkbox" value="" id="' + option.id + '"' + checkedAttr + '>' +
-                '<label class="form-check-label" for="' + option.id + '">' +
+                '<label>' +
+                '<input class="form-check-input" type="checkbox" value="" name="' + option.id + '"' + checkedAttr + '>' +
                 option.name + ' <small class="text-muted">(' + ips + ')</small>' +
                 '</label>' +
                 '</div>';
@@ -75,24 +75,23 @@ M.availability_ip.form.getNode = function(json) {
         customHidden = '';
     }
     html += '<div class="form-check">' +
-            '<input class="form-check-input" type="checkbox" value="" id="-custom-check-"' + customChecked + '>' +
-            '<label class="form-check-label" for="-custom-check-">' +
+            '<label class="form-check-label">' +
+            '<input class="form-check-input" type="checkbox" value="" name="-custom-check-"' + customChecked + '>' +
             M.util.get_string('custom_ip', 'availability_ip') +
             '</label>' +
             '</div>';
-    html += '<div id="-custom-container-" class="mt-2"' + customHidden + '>' +
-            '<input id="-custom-" ' +
+    html += '<div class="availability_ip-custom-container" class="mt-2"' + customHidden + '>' +
+            '<input name="-custom-" ' +
                    'type="text" ' +
                    'value="' + customValue + '" ' +
-                   'class="form-control" ' +
-                   'aria-describedby="custom-help">' +
-            '<div class="form-text text-muted" id="custom-help">' +
+                   'class="form-control">' +
+            '<div class="form-text text-muted">' +
             M.util.get_string('custom_ip_help', 'availability_ip') +
             '</div>' +
             '</div>';
     html += '</span></label>';
     var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
-    var customContainerNode = node.one('div[id="-custom-container-"]');
+    var customContainerNode = node.one('div.availability_ip-custom-container');
     // Add event handlers for when a checkbox is ticked (`change`) or custom input changes (`input`).
     if (!M.availability_ip.form.addedEvents) {
         M.availability_ip.form.addedEvents = true;
@@ -103,7 +102,7 @@ M.availability_ip.form.getNode = function(json) {
                 // Update the form fields.
                 M.core_availability.form.update();
                 // Show/hide custom IP input field.
-                if (event.type === 'change' && event.target.get('id') === '-custom-check-') {
+                if (event.type === 'change' && event.target.get('name') === '-custom-check-') {
                     if (event.target.get('checked')) {
                         customContainerNode.show();
                     } else {
@@ -121,7 +120,7 @@ M.availability_ip.form.getNode = function(json) {
  * Fills in the value from this plugin's controls into a value object,
  * which will later be converted to JSON and stored in the form field.
  *
- * Sets the `ids` property to the ids of the checked options
+ * Sets the `ids` property to the names of the checked options
  * and the `custom` property to an array of values taken from the custom IP input.
  *
  * @method fillValue
@@ -131,16 +130,16 @@ M.availability_ip.form.getNode = function(json) {
 M.availability_ip.form.fillValue = function(value, node) {
     // Collect values from all selected checkboxes (excluding the "custom" checkbox).
     value.ids = [];
-    node.one('span[id=availability_ip-options]').all('input').each(function(input) {
-        var id = input.get('id');
-        if (id !== '-custom-check-' && input.get('checked')) {
-            value.ids.push(id);
+    node.one('span.availability_ip-options').all('input').each(function(input) {
+        var name = input.get('name');
+        if (name !== '-custom-check-' && input.get('checked')) {
+            value.ids.push(name);
         }
     });
     // If the custom checkbox is selected, get custom IP addresses/ranges (comma-separated) from the input field.
     // If it is not selected, ignore the text input.
-    if (node.one('input[id="-custom-check-"]').get('checked')) {
-        var customInputText = node.one('span[id=availability_ip-options] input[id=-custom-]').get('value').trim();
+    if (node.one('input[name="-custom-check-"]').get('checked')) {
+        var customInputText = node.one('span.availability_ip-options input[name="-custom-"]').get('value').trim();
         // Split into an array and filter out empty strings.
         value.custom = customInputText.split(/\s*,\s*/).filter(Boolean);
     } else {
@@ -177,7 +176,7 @@ M.availability_ip.form.fillErrors = function(errors, node) {
             return true;
         });
     } else if (value.ids.length === 0) {
-        // Neither a custom input was provided, nor a checkbox selected.
+        // Neither a custom input was provided nor a checkbox selected.
         errors.push('availability_ip:error_select_ip');
     }
     // TODO: Unfortunately the Moodle code handling the errors array is poorly implemented.

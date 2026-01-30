@@ -36,11 +36,11 @@ Feature: Setting availability conditions for a course module.
     When I click on "IP" "button"
     # Check that all option presets defined above are visible.
     Then I should see a warning badge with "No IP address/range selected."
-    And I should see a checkbox labeled "Local machine"
-    And I should see a checkbox labeled "Current IP"
-    And I should see a checkbox labeled "Current IP range"
-    And I should see a checkbox labeled "Current IP CIDR"
-    And I should see a checkbox labeled "Different IP"
+    And I should see a checkbox labeled "Local machine" for the input "localhost"
+    And I should see a checkbox labeled "Current IP" for the input "me"
+    And I should see a checkbox labeled "Current IP range" for the input "me_range"
+    And I should see a checkbox labeled "Current IP CIDR" for the input "me_cidr"
+    And I should see a checkbox labeled "Different IP" for the input "not_me"
 
   Scenario: Entering custom IP values.
     # This is not done as a scenario outline because running one scenario per input would take way too long.

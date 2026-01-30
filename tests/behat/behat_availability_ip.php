@@ -161,8 +161,10 @@ class behat_availability_ip extends behat_base {
     /**
      * Asserts that a checkbox with a specific label is visible.
      *
-     * @param string $label Exact contents of the expected label element.
-     * @param string|null $inputname Value of the `for` attribute the label must have. Ignored if `null` (default).
+     * Assumes the checkbox `<input>` is _inside_ its `<label>` element.
+     *
+     * @param string $label Exact text contents of the expected label element.
+     * @param string|null $inputname Value of the `name` attribute the input must have. Ignored if `null` (default).
      * @throws Exception
      *
      * {@noinspection PhpUnused}
@@ -171,10 +173,11 @@ class behat_availability_ip extends behat_base {
     #[Then('I should see a checkbox labeled :label for the input :inputname')]
     public function i_should_see_a_checkbox_labeled(string $label, string|null $inputname = null): void {
         $labelpredicate = "starts-with(text(), '$label')";
+        $inputpredicate = "@type='checkbox'";
         if (!is_null($inputname)) {
-            $labelpredicate .= " and @for='$inputname'";
+            $inputpredicate .= " and @name='$inputname'";
         }
-        $xpath = "//input[@type='checkbox']/following-sibling::label[$labelpredicate]";
+        $xpath = "//input[$inputpredicate]/parent::label[$labelpredicate]";
         $this->execute(
             'behat_general::should_be_visible',
             [$xpath, 'xpath_element'],
