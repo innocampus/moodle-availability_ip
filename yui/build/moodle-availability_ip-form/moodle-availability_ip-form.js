@@ -52,18 +52,19 @@ M.availability_ip.form.initInner = function(ipoptions) {
  * @return {Y.Node} YUI node
  */
 M.availability_ip.form.getNode = function(json) {
-    // TODO: See if we can use a template instead.
-    var html = '<label><span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
+    // TODO: Unfortunately, due to the synchronous way this is implemented in the `core_availability` YUI module,
+    //       it is impossible to use the asynchronous `core/templates` utilities without ugly hacks,
+    //       so we are stuck with wonderful string concatenation for now.
+    var html = '<span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
                '<span class="availability-group availability_ip-options">';
     var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
         var checkedAttr = initialValues.includes(option.id) ? ' checked' : '';
         var ips = option.ips.join(', ');
         html += '<div class="form-check">' +
-                '<label>' +
+                '<label class="form-check-label">' +
                 '<input class="form-check-input" type="checkbox" value="" name="' + option.id + '"' + checkedAttr + '>' +
                 option.name + ' <small class="text-muted">(' + ips + ')</small>' +
-                '</label>' +
                 '</div>';
     });
     var customValue = '';
