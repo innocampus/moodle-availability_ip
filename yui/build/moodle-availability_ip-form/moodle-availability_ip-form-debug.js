@@ -65,6 +65,7 @@ M.availability_ip.form.getNode = function(json) {
                 '<label class="form-check-label">' +
                 '<input class="form-check-input" type="checkbox" value="" name="' + option.id + '"' + checkedAttr + '>' +
                 option.name + ' <small class="text-muted">(' + ips + ')</small>' +
+                '</label>' +
                 '</div>';
     });
     var customValue = '';
@@ -90,7 +91,7 @@ M.availability_ip.form.getNode = function(json) {
             M.util.get_string('custom_ip_help', 'availability_ip') +
             '</div>' +
             '</div>';
-    html += '</span></label>';
+    html += '</span>';
     var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
     var customContainerNode = node.one('div.availability_ip-custom-container');
     // Add event handlers for when a checkbox is ticked (`change`) or custom input changes (`input`).
