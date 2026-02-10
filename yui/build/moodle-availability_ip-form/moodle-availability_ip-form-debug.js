@@ -55,8 +55,8 @@ M.availability_ip.form.getNode = function(json) {
     // TODO: Unfortunately, due to the synchronous way this is implemented in the `core_availability` YUI module,
     //       it is impossible to use the asynchronous `core/templates` utilities without ugly hacks,
     //       so we are stuck with wonderful string concatenation for now.
-    var html = '<span class="pe-3">' + M.util.get_string('ip_options_select', 'availability_ip') + '</span> ' +
-               '<span class="availability-group availability_ip-options">';
+    var html = '<div class="pb-2">' + M.util.get_string('ip_options_select', 'availability_ip') + '</div> ' +
+               '<div class="availability-group availability_ip-options">';
     var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
         var checkedAttr = initialValues.includes(option.id) ? ' checked' : '';
@@ -82,7 +82,7 @@ M.availability_ip.form.getNode = function(json) {
             M.util.get_string('custom_ip', 'availability_ip') +
             '</label>' +
             '</div>';
-    html += '<div class="availability_ip-custom-container" class="mt-2"' + customHidden + '>' +
+    html += '<div class="mt-2"' + customHidden + '>' +
             '<input name="-custom-" ' +
                    'type="text" ' +
                    'value="' + customValue + '" ' +
@@ -91,9 +91,8 @@ M.availability_ip.form.getNode = function(json) {
             M.util.get_string('custom_ip_help', 'availability_ip') +
             '</div>' +
             '</div>';
-    html += '</span>';
-    var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
-    var customContainerNode = node.one('div.availability_ip-custom-container');
+    html += '</div>';
+    var node = Y.Node.create('<div class="d-flex flex-column">' + html + '</div>');
     // Add event handlers for when a checkbox is ticked (`change`) or custom input changes (`input`).
     if (!M.availability_ip.form.addedEvents) {
         M.availability_ip.form.addedEvents = true;
@@ -105,6 +104,7 @@ M.availability_ip.form.getNode = function(json) {
                 M.core_availability.form.update();
                 // Show/hide custom IP input field.
                 if (event.type === 'change' && event.target.get('name') === '-custom-check-') {
+                    var customContainerNode = event.target.get('parentNode.parentNode.nextSibling');
                     if (event.target.get('checked')) {
                         customContainerNode.show();
                     } else {
@@ -130,23 +130,21 @@ M.availability_ip.form.getNode = function(json) {
  * @param {Y.Node} node YUI node (same one returned from getNode)
  */
 M.availability_ip.form.fillValue = function(value, node) {
-    // Collect values from all selected checkboxes (excluding the "custom" checkbox).
     value.ids = [];
-    node.one('span.availability_ip-options').all('input').each(function(input) {
+    value.custom = [];
+    // Collect values from all selected checkboxes.
+    // If the "custom" checkbox is not selected, ignore its associated text input.
+    node.all('input[type="checkbox"]:checked').each(function(input) {
         var name = input.get('name');
-        if (name !== '-custom-check-' && input.get('checked')) {
+        // If the custom checkbox is selected, get custom IP addresses/ranges (comma-separated) from the text input field.
+        if (name === '-custom-check-') {
+            var customInputText = node.one('input[name="-custom-"]').get('value').trim();
+            // Split into an array and filter out empty strings.
+            value.custom = customInputText.split(/\s*,\s*/).filter(Boolean);
+        } else {
             value.ids.push(name);
         }
     });
-    // If the custom checkbox is selected, get custom IP addresses/ranges (comma-separated) from the input field.
-    // If it is not selected, ignore the text input.
-    if (node.one('input[name="-custom-check-"]').get('checked')) {
-        var customInputText = node.one('span.availability_ip-options input[name="-custom-"]').get('value').trim();
-        // Split into an array and filter out empty strings.
-        value.custom = customInputText.split(/\s*,\s*/).filter(Boolean);
-    } else {
-        value.custom = [];
-    }
 };
 
 /**
