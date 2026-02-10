@@ -25,6 +25,7 @@
  */
 
 use availability_ip\admin_ip_option;
+use Behat\Mink\Exception\ElementNotFoundException;
 use Behat\Step\Given;
 use Behat\Step\Then;
 use Behat\Transformation\Transform;
@@ -90,6 +91,31 @@ class behat_availability_ip extends behat_base {
     #[Given('the following IP option presets exist:')]
     public function the_following_ip_option_presets_exist(array $options): void {
         set_config('ip_option_presets', implode("\n", $options), 'availability_ip');
+    }
+
+    /**
+     * Checks the `n`-th checkbox with the specified `name` attribute.
+     *
+     * @param string $position Position of the checkbox (1-based) in the list of all checkboxes with the same `name` attribute.
+     * @param string $name Value of the `name` attribute of the checkbox.
+     *
+     * {@noinspection PhpUnused}
+     */
+    #[Then('/^I check the (?P<position>\d+)(?:st|nd|rd|th) "(?P<name>[^"]*)" checkbox$/')]
+    public function i_check_the_nth_checkbox(string $position, string $name): void {
+        $xpath = "(//input[@type='checkbox'][@name='$name'])[$position]";
+        $exception = new ElementNotFoundException(
+            driver: $this->getSession(),
+            type: 'checkbox',
+            selector: 'xpath',
+            locator: $xpath,
+        );
+        $checkbox = $this->find(
+            selector: 'xpath',
+            locator: $xpath,
+            exception: $exception,
+        );
+        $checkbox->check();
     }
 
     /**
@@ -179,7 +205,7 @@ class behat_availability_ip extends behat_base {
         }
         $xpath = "//input[$inputpredicate]/parent::label[$labelpredicate]";
         $this->execute(
-            'behat_general::should_be_visible',
+            [behat_general::class, 'should_be_visible'],
             [$xpath, 'xpath_element'],
         );
     }
@@ -207,7 +233,7 @@ class behat_availability_ip extends behat_base {
             };
         }
         $this->execute(
-            'behat_general::assert_element_contains_text',
+            [behat_general::class, 'assert_element_contains_text'],
             [$text, $locator, 'css_element'],
         );
     }
@@ -223,7 +249,7 @@ class behat_availability_ip extends behat_base {
     #[Then('I should see a warning badge with :text')]
     public function i_should_see_a_warning_badge_with(string $text): void {
         $this->execute(
-            'behat_general::assert_element_contains_text',
+            [behat_general::class, 'assert_element_contains_text'],
             [$text, '.badge.bg-warning', 'css_element'],
         );
     }

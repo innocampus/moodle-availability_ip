@@ -178,6 +178,34 @@ Feature: Setting availability conditions for a course module.
       | <not_behat_user>               | should               |
       | <behat_user>, <not_behat_user> | should not           |
 
+  Scenario: More than one IP availability condition.
+    Given I am on the "P1" "page activity editing" page logged in as "teacher1"
+    And I expand all fieldsets
+    # First add an IP condition that the Behat user will not pass.
+    And I click on "Add restriction..." "button"
+    And I click on "IP" "button"
+    Then I should see a warning badge with "No IP address/range selected."
+    When I click on "-custom-check-" "checkbox"
+    # The custom IP help text should be visible.
+    Then I should see "Input must either be a full IP address"
+    Then I set the custom IP field to "<not_behat_user>"
+    Then I should not see "No IP address/range selected."
+    # Next add another IP condition that the Behat user will pass.
+    And I click on "Add restriction..." "button"
+    # Fun fact: Because the previous steps leave an invisible zombie restriction dialogue in the DOM,
+    # the following step will fail, without the ` in the "Add restriction..." "dialogue"` at the end.
+    And I click on "IP" "button" in the "Add restriction..." "dialogue"
+    # Make sure to modify the second condition now.
+    And I check the 2nd "me" checkbox
+    # Finally combine the two conditions with with an `OR` so that the latter is sufficient.
+    Then I set the field "Required restrictions" to "any"
+    And I click on "Save and return to course" "button"
+    # Log in as student1. Module should available.
+    Given I am on the "Course 1" "course" page logged in as "student1"
+    Then I should not see "Not available"
+    When I am on the "P1" "activity" page
+    Then I should see "Test page content"
+
   Scenario: IP is combined with another availability condition.
     Given I am on the "P1" "page activity editing" page logged in as "teacher1"
     And I expand all fieldsets
