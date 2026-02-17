@@ -82,7 +82,7 @@ M.availability_ip.form.getNode = function(json) {
             M.util.get_string('custom_ip', 'availability_ip') +
             '</label>' +
             '</div>';
-    html += '<div class="mt-2"' + customHidden + '>' +
+    html += '<div class="availability_ip-custom-container mt-2"' + customHidden + '>' +
             '<input name="-custom-" ' +
                    'type="text" ' +
                    'value="' + customValue + '" ' +
@@ -104,12 +104,11 @@ M.availability_ip.form.getNode = function(json) {
                 M.core_availability.form.update();
                 // Show/hide custom IP input field.
                 if (event.type === 'change' && event.target.get('name') === '-custom-check-') {
-                    var customContainerNode = event.target.get('parentNode.parentNode.nextSibling');
-                    if (event.target.get('checked')) {
-                        customContainerNode.show();
-                    } else {
-                        customContainerNode.hide();
-                    }
+                    var customContainer = event.target
+                        .getDOMNode()
+                        .closest('.availability_ip-options')
+                        .querySelector('.availability_ip-custom-container');
+                    customContainer.hidden = !event.target.get('checked');
                 }
             },
             '.availability_ip input'
