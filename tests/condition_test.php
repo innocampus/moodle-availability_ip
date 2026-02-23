@@ -21,7 +21,7 @@
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * {@noinspection PhpIllegalPsrClassPathInspection}
+ * {@noinspection PhpIllegalPsrClassPathInspection, PhpUnhandledExceptionInspection}
  */
 
 namespace availability_ip;
@@ -41,11 +41,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(condition::class)]
-class condition_test extends advanced_testcase {
-
+final class condition_test extends advanced_testcase {
     /**
      * Ensures that relevant files are loaded.
      */
+    #[\Override]
     public static function setupBeforeClass(): void {
         global $CFG;
         parent::setupBeforeClass();
@@ -53,6 +53,8 @@ class condition_test extends advanced_testcase {
     }
 
     /**
+     * Tests the {@see condition::__construct} method.
+     *
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param array|string $expected An array representing the expected properties of the initialized {@see condition} instance or
@@ -64,7 +66,7 @@ class condition_test extends advanced_testcase {
      * @throws coding_exception
      * @throws dml_exception
      */
-    #[DataProvider('test___construct_provider')]
+    #[DataProvider('provider_test___construct')]
     public function test___construct(array $presets, array $structure, array|string $expected, bool $debugging = false): void {
         $this->resetAfterTest();
         set_config(
@@ -100,8 +102,10 @@ class condition_test extends advanced_testcase {
      * Data provider for the {@see test___construct} method.
      *
      * @return array[] Inputs for the test method.
+     *
+     * @phpcs:disable moodle.Strings.ForbiddenStrings
      */
-    public static function test___construct_provider(): array {
+    public static function provider_test___construct(): array {
         return [
             'No `ids` and no `custom`' => [
                 'presets' => [],
@@ -159,13 +163,15 @@ class condition_test extends advanced_testcase {
     }
 
     /**
+     * Tests the {@see condition::is_available} method.
+     *
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param bool $expected Whether we expect the test module to be available to the user.
      * @throws coding_exception
      * @throws dml_exception
      */
-    #[DataProvider('test_is_available_provider')]
+    #[DataProvider('provider_test_is_available')]
     public function test_is_available(array $presets, array $structure, bool $expected): void {
         $this->resetAfterTest();
         set_config(
@@ -185,7 +191,7 @@ class condition_test extends advanced_testcase {
      *
      * @return array[] Inputs for the test method.
      */
-    public static function test_is_available_provider(): array {
+    public static function provider_test_is_available(): array {
         return [
             'IP neither matches an admin option preset nor the custom range' => [
                 'presets' => [
@@ -236,10 +242,6 @@ class condition_test extends advanced_testcase {
         ];
     }
 
-    /**
-     * @throws coding_exception
-     * @throws dml_exception
-     */
     public function test_get_description(): void {
         $condition = new condition((object) ['ids' => []]);
         $info = new mock_info();
@@ -257,28 +259,32 @@ class condition_test extends advanced_testcase {
         // We expect our implementation to simply JSON encode the return value of the `save` method.
         // Therefore, we simply mock the `save` method and check if it is called.
         $condition = $this->getMockBuilder(condition::class)
-                          ->disableOriginalConstructor()
-                          ->onlyMethods(['save'])
-                          ->getMock();
+            ->disableOriginalConstructor()
+            ->onlyMethods(['save'])
+            ->getMock();
         $saveobject = (object) ['type' => 'ip', 'foo' => 'bar'];
         $condition->expects($this->once())
-                  ->method('save')
-                  ->willReturn($saveobject)
-                  ->with();
+            ->method('save')
+            ->willReturn($saveobject)
+            ->with();
         // Simple closure binding workaround to test the protected method.
-        $closure = function(): string { return $this->get_debug_string(); };
+        $closure = function (): string {
+            return $this->get_debug_string();
+        };
         $output = $closure->call($condition);
         self::assertSame(json_encode($saveobject), $output);
     }
 
     /**
+     * Tests the {@see condition::save} method.
+     *
      * @param array $presets Admin options presets to set at the beginning.
      * @param array $structure Constructor argument for {@see condition}.
      * @param array $expected Expected properties on the returned object.
      * @throws coding_exception
      * @throws dml_exception
      */
-    #[DataProvider('test_save_provider')]
+    #[DataProvider('provider_test_save')]
     public function test_save(array $presets, array $structure, array $expected): void {
         $this->resetAfterTest();
         set_config(
@@ -295,7 +301,7 @@ class condition_test extends advanced_testcase {
      *
      * @return array[] Inputs for the test method.
      */
-    public static function test_save_provider(): array {
+    public static function provider_test_save(): array {
         return [
             'Just a custom IP' => [
                 'presets' => [],

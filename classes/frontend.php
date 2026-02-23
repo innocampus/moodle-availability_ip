@@ -34,14 +34,13 @@ use stdClass;
 /**
  * Class for front-end (editing form) functionality.
  *
- * @see https://moodledev.io/docs/4.5/apis/plugintypes/availability#classesfrontendphp
+ * @link https://moodledev.io/docs/apis/plugintypes/availability#classesfrontendphp Moodle availability frontend docs
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class frontend extends abstract_frontend {
-
     /**
      * Returns an array of arguments to be passed to the plugin's JavaScript `initInner` function.
      *
@@ -55,11 +54,13 @@ class frontend extends abstract_frontend {
      * @throws coding_exception
      * @throws dml_exception
      */
+    #[\Override]
     protected function get_javascript_init_params($course, cm_info|null $cm = null, section_info|null $section = null): array {
         $optionpresets = admin_setting_ip_options::get_parsed('availability_ip', 'ip_option_presets');
         return [array_values($optionpresets)];
     }
 
+    #[\Override]
     protected function get_javascript_strings(): array {
         return [
             'custom_ip',

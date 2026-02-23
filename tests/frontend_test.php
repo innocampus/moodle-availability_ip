@@ -39,14 +39,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(frontend::class)]
-class frontend_test extends advanced_testcase {
-
+final class frontend_test extends advanced_testcase {
     /**
+     * Tests the {@see frontend::get_javascript_init_params()} method.
+     *
      * @param string|null $config Value for the `ip_option_presets` config to set.
      * @param array[] $expected IP options (as associative arrays) expected as the first and only element in the returned array.
      * {@noinspection PhpUndefinedMethodInspection}
      */
-    #[DataProvider('test_get_javascript_init_params_provider')]
+    #[DataProvider('provider_test_get_javascript_init_params')]
     public function test_get_javascript_init_params(string|null $config, array $expected): void {
         if (!is_null($config)) {
             $this->resetAfterTest();
@@ -54,10 +55,12 @@ class frontend_test extends advanced_testcase {
         }
         // We need nothing from the parent implementation/constructor and no internal state for our method.
         $frontend = $this->getMockBuilder(frontend::class)
-                         ->disableOriginalConstructor()
-                         ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
         // Simple closure binding workaround to test the protected method.
-        $closure = function(): array { return $this->get_javascript_init_params(new stdClass()); };
+        $closure = function (): array {
+            return $this->get_javascript_init_params(new stdClass());
+        };
         $output = $closure->call($frontend);
         self::assertCount(1, $output);
         $options = array_map(fn (admin_ip_option $option): array => (array) $option, $output[0]);
@@ -69,7 +72,7 @@ class frontend_test extends advanced_testcase {
      *
      * @return array[] Inputs for the test method.
      */
-    public static function test_get_javascript_init_params_provider(): array {
+    public static function provider_test_get_javascript_init_params(): array {
         return [
             'No preset options' => [
                 'config' => null,
@@ -91,10 +94,12 @@ class frontend_test extends advanced_testcase {
     public function test_get_javascript_strings(): void {
         // We need nothing from the parent implementation/constructor and no internal state for our method.
         $frontend = $this->getMockBuilder(frontend::class)
-                         ->disableOriginalConstructor()
-                         ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
         // Simple closure binding workaround to test the protected method.
-        $closure = function(): array { return $this->get_javascript_strings(); };
+        $closure = function (): array {
+            return $this->get_javascript_strings();
+        };
         $output = $closure->call($frontend);
         $expected = [
             'custom_ip',

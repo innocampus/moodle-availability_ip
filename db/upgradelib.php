@@ -46,13 +46,13 @@ function replace_custom_single_ips_with_arrays(): void {
             }
         }
         $transaction->allow_commit();
-    // @codeCoverageIgnoreStart
+        // @codeCoverageIgnoreStart
     } catch (dml_exception | JsonException $e) {
         if (!empty($transaction) && !$transaction->is_disposed()) {
             $transaction->rollback($e);
         }
         throw $e;
-    // @codeCoverageIgnoreEnd
+        // @codeCoverageIgnoreEnd
     } finally {
         $recordset->close();
     }

@@ -43,20 +43,23 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 #[CoversFunction('replace_custom_single_ips_with_arrays')]
 #[CoversFunction('replace_custom_single_ip_with_array')]
-class upgradelib_test extends advanced_testcase {
+final class upgradelib_test extends advanced_testcase {
+    #[\Override]
     public static function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
         require_once(__DIR__ . '/../db/upgradelib.php');
     }
 
     /**
+     * Tests the {@see replace_custom_single_ips_with_arrays} function.
+     *
      * @param string $module Type of module to create (e.g. `page` or `forum`).
      * @param array $initial Conditions to set for the module initially.
      * @param array $expected Conditions expected to be set after the replacement function was called.
      * @throws dml_exception
      * @throws JsonException
      */
-    #[DataProvider('test_replace_custom_single_ips_with_arrays_provider')]
+    #[DataProvider('provider_test_replace_custom_single_ips_with_arrays')]
     public function test_replace_custom_single_ips_with_arrays(string $module, array $initial, array $expected): void {
         global $DB;
         $this->resetAfterTest();
@@ -88,7 +91,7 @@ class upgradelib_test extends advanced_testcase {
      *
      * @return array[] Inputs for the test method.
      */
-    public static function test_replace_custom_single_ips_with_arrays_provider(): array {
+    public static function provider_test_replace_custom_single_ips_with_arrays(): array {
         $unrelatedcondition = date_condition::get_json(date_condition::DIRECTION_FROM, time());
         return [
             'Two custom IP conditions and an unrelated one' => [
@@ -113,7 +116,7 @@ class upgradelib_test extends advanced_testcase {
                 'expected' => [
                     $unrelatedcondition,
                     ['type' => 'ip', 'ids' => [], 'custom' => []],
-                ]
+                ],
             ],
             'Unrelated availability condition' => [
                 'module' => 'url',

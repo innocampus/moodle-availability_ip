@@ -40,18 +40,18 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(admin_ip_option::class)]
-class admin_ip_option_test extends advanced_testcase {
+final class admin_ip_option_test extends advanced_testcase {
     /**
      * Tests the {@see admin_ip_option::__construct} and {@see admin_ip_option::__toString} methods.
-     * 
+     *
      * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
      * @param string|Exception $expected Expected string representation of the constructed instance or expected exception object.
      * @throws coding_exception
      */
-    #[DataProvider('test___construct_and___toString_provider')]
-    public function test___construct_and___toString(
+    #[DataProvider('provider_test_construct_and_stringify')]
+    public function test_construct_and_stringify(
         array $ips,
         string $id,
         string $name,
@@ -70,11 +70,11 @@ class admin_ip_option_test extends advanced_testcase {
     }
 
     /**
-     * Data provider for the {@see test___construct_and___toString} method.
+     * Data provider for the {@see test_construct_and_stringify} method.
      *
      * @return array Inputs for the test method.
      */
-    public static function test___construct_and___toString_provider(): array {
+    public static function provider_test_construct_and_stringify(): array {
         return [
             'Single IPv4 address' => [
                 'ips' => ['127.0.0.1'],
@@ -141,11 +141,11 @@ class admin_ip_option_test extends advanced_testcase {
 
     /**
      * Test the {@see admin_ip_option::parse} method.
-     * 
+     *
      * @param string $line Input for the method.
      * @param array|null $expected Expected properties on the returned object or `null` if `null` is expected to be returned.
      */
-    #[DataProvider('test_parse_provider')]
+    #[DataProvider('provider_test_parse')]
     public function test_parse(string $line, array|null $expected): void {
         $option = admin_ip_option::parse($line);
         if (is_null($expected)) {
@@ -161,7 +161,7 @@ class admin_ip_option_test extends advanced_testcase {
      *
      * @return array Inputs for the test method.
      */
-    public static function test_parse_provider(): array {
+    public static function provider_test_parse(): array {
         return [
             'Single IPv4 address' => [
                 'line' => '127.0.0.1 foo Bar Baz',

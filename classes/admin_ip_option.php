@@ -27,25 +27,33 @@ namespace availability_ip;
 use core\exception\coding_exception;
 use core\ip_utils;
 
+// TODO: Remove the @phpcs:disable tag in the following PHPDoc, once https://github.com/moodlehq/moodle-cs/pull/224 is merged.
+
 /**
  * Encapsulates an IP option preset by administrators via {@see admin_setting_ip_options}.
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @phpcs:disable moodle.Files.MoodleInternal
  */
-final class admin_ip_option {
-
+final readonly class admin_ip_option {
     /**
+     * Validates the provided IP addresses.
+     *
      * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
      * @throws coding_exception One of the provided `$ìps` is not a valid IP address/range.
      */
     public function __construct(
-        public readonly array $ips,
-        public readonly string $id,
-        public readonly string $name,
+        /** @var string[] $ips IP addresses/ranges. */
+        public array $ips,
+        /** @var string $id Option identifier. */
+        public string $id,
+        /** @var string $name Human-readable name for the option. */
+        public string $name,
     ) {
         foreach ($this->ips as $ip) {
             if (!ip_utils::is_ipv4_address($ip) && !ip_utils::is_ipv4_range($ip)) {

@@ -42,13 +42,14 @@ use stdClass;
  * **CAUTION**: If no (valid) IP address/range is provided, {@see is_available} will always be `false` for positive conditions and
  * always `true` for inverted conditions!
  *
- * @see https://moodledev.io/docs/4.5/apis/plugintypes/availability#classesconditionphp
+ * @link https://moodledev.io/docs/apis/plugintypes/availability#classesconditionphp Moodle availability condition docs
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends abstract_condition {
+    /** @var string Fake client IP address used for unit tests. */
     const PHPUNIT_CLIENT_IP = '255.255.255.254';
 
     /** @var admin_ip_option[] $options Chosen options for the availability condition */
@@ -71,11 +72,11 @@ class condition extends abstract_condition {
      */
     public function __construct(stdClass $structure) {
         if (!isset($structure->ids) && !isset($structure->custom)) {
-            throw new coding_exception("Both `ids` and `custom` properties are missing from the structure.");
+            throw new coding_exception("Both 'ids' and 'custom' properties are missing from the structure.");
         }
         $ids = $structure->ids ?? [];
         if (!is_array($ids)) {
-            throw new coding_exception("The `ids` property is not an array");
+            throw new coding_exception("The 'ids' property is not an array");
         }
         $this->customips = $structure->custom ?? [];
         foreach ($this->customips as $custom) {
@@ -102,6 +103,7 @@ class condition extends abstract_condition {
         $this->options = $options;
     }
 
+    #[\Override]
     public function is_available($not, info $info, $grabthelot, $userid): bool {
         $clientip = PHPUNIT_TEST ? self::PHPUNIT_CLIENT_IP : getremoteaddr();
         // If the client IP matches at least one of the IP addresses/ranges, then the availability condition is satisfied.
@@ -119,15 +121,22 @@ class condition extends abstract_condition {
         return $not;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws coding_exception
+     */
+    #[\Override]
     public function get_description($full, $not, info $info): string {
-        /** {@noinspection PhpUnhandledExceptionInspection} */
         return get_string('condition_description', 'availability_ip');
     }
 
+    #[\Override]
     protected function get_debug_string(): string {
         return json_encode($this->save());
     }
 
+    #[\Override]
     public function save(): stdClass {
         $structure = ['type' => 'ip'];
         if (count($this->options) > 0) {

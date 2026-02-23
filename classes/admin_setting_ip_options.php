@@ -42,8 +42,10 @@ require_once("$CFG->libdir/adminlib.php");
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_ip_options extends admin_setting_configtextarea {
+    /** @var string Font family to use in the text area. */
     const FONT_FAMILY = 'var(--bs-font-monospace)';
 
+    #[\Override]
     public function output_html($data, $query = ''): string {
         $style = '<style>' . "\n";
         $style .= "textarea[name=\"{$this->get_full_name()}\"] ";
@@ -61,6 +63,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
      * @return true|string `true` if validation was successful, error string otherwise
      * @throws coding_exception
      */
+    #[\Override]
     public function validate($data): bool|string {
         if (true !== $result = parent::validate($data)) {
             return $result;

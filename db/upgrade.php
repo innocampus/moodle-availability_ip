@@ -26,7 +26,9 @@
  * {@noinspection PhpUnused}
  */
 
-require_once __DIR__ . '/upgradelib.php';
+defined('MOODLE_INTERNAL') || die;
+
+require_once(__DIR__ . '/upgradelib.php');
 
 /**
  * Performs the steps required to bring the plugin to the correct state for the current version.

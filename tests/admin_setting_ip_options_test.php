@@ -21,7 +21,7 @@
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * {@noinspection PhpIllegalPsrClassPathInspection}
+ * {@noinspection PhpIllegalPsrClassPathInspection, PhpUnhandledExceptionInspection}
  */
 
 namespace availability_ip;
@@ -42,11 +42,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(admin_setting_ip_options::class)]
-class admin_setting_ip_options_test extends advanced_testcase {
-
+final class admin_setting_ip_options_test extends advanced_testcase {
     /**
      * Ensures that relevant files are loaded.
      */
+    #[\Override]
     public static function setupBeforeClass(): void {
         global $CFG;
         parent::setupBeforeClass();
@@ -78,12 +78,14 @@ class admin_setting_ip_options_test extends advanced_testcase {
     }
 
     /**
+     * Tests the {@see admin_setting_ip_options::validate} method.
+     *
      * @param string $data Input for the method.
      * @param array|string $expected Any array if the input data is expected to pass validation; expected error string otherwise.
      *                               (The array type is just because we are re-using the data provider.)
      * @throws coding_exception
      */
-    #[DataProvider('test_parse_ip_options_provider')]
+    #[DataProvider('provider_test_parse_ip_options')]
     public function test_validate(string $data, array|string $expected = []): void {
         $options = new admin_setting_ip_options(
             name: 'does_not_matter',
@@ -119,12 +121,14 @@ class admin_setting_ip_options_test extends advanced_testcase {
     }
 
     /**
+     * Tests the {@see admin_setting_ip_options::parse_ip_options} method.
+     *
      * @param string $data Input for the method.
      * @param array|string $expected Resulting admin options (as associative arrays) if the input data is expected to be valid;
      *                               expected error string otherwise.
      * @throws coding_exception
      */
-    #[DataProvider('test_parse_ip_options_provider')]
+    #[DataProvider('provider_test_parse_ip_options')]
     public function test_parse_ip_options(string $data, array|string $expected = []): void {
         $output = admin_setting_ip_options::parse_ip_options($data);
         if (is_string($expected)) {
@@ -140,13 +144,15 @@ class admin_setting_ip_options_test extends advanced_testcase {
     }
 
     /**
+     * Tests the {@see admin_setting_ip_options::get_parsed} method.
+     *
      * @param string $data Input for the method.
      * @param array|string $expected Resulting admin options (as associative arrays) if the input data is expected to be valid;
      *                               any string otherwise. (The string type is just because we are re-using the data provider.)
      * @throws coding_exception
      * @throws dml_exception
      */
-    #[DataProvider('test_parse_ip_options_provider')]
+    #[DataProvider('provider_test_parse_ip_options')]
     public function test_get_parsed(string $data, array|string $expected): void {
         $this->resetAfterTest();
         set_config('foo', $data, 'availability_ip');
@@ -163,10 +169,6 @@ class admin_setting_ip_options_test extends advanced_testcase {
         }
     }
 
-    /**
-     * @throws coding_exception
-     * @throws dml_exception
-     */
     public function test_get_parsed_no_config(): void {
         $output = admin_setting_ip_options::get_parsed('availability_ip', 'foo');
         self::assertSame([], $output);
@@ -178,7 +180,7 @@ class admin_setting_ip_options_test extends advanced_testcase {
      * @return array[] Inputs for the test method.
      * @throws coding_exception
      */
-    public static function test_parse_ip_options_provider(): array {
+    public static function provider_test_parse_ip_options(): array {
         return [
             'Empty string' => [
                 'data' => '',
