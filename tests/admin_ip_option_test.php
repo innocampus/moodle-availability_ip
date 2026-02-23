@@ -28,6 +28,7 @@ namespace availability_ip;
 
 use advanced_testcase;
 use core\exception\coding_exception;
+use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -40,98 +41,107 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 #[CoversClass(admin_ip_option::class)]
 class admin_ip_option_test extends advanced_testcase {
-
     /**
+     * Tests the {@see admin_ip_option::__construct} and {@see admin_ip_option::__toString} methods.
+     * 
      * @param string[] $ips IP addresses/ranges.
      * @param string $id Option identifier.
      * @param string $name Human-readable name for the option.
-     * @param string|null $error Error class name, if such an error is to be expected; `null` (default) otherwise.
+     * @param string|Exception $expected Expected string representation of the constructed instance or expected exception object.
      * @throws coding_exception
      */
-    #[DataProvider('test___construct_provider')]
-    public function test___construct(
+    #[DataProvider('test___construct_and___toString_provider')]
+    public function test___construct_and___toString(
         array $ips,
         string $id,
         string $name,
-        string|null $error = null,
+        string|Exception $expected,
     ): void {
-        if (is_null($error)) {
+        if (is_string($expected)) {
             $option = new admin_ip_option($ips, $id, $name);
             self::assertSame($ips, $option->ips);
             self::assertSame($id, $option->id);
             self::assertSame($name, $option->name);
+            self::assertSame($expected, (string) $option);
         } else {
-            $this->expectException($error);
+            $this->expectExceptionObject($expected);
             new admin_ip_option($ips, $id, $name);
         }
     }
 
     /**
-     * Data provider for the {@see test___construct} method.
+     * Data provider for the {@see test___construct_and___toString} method.
      *
      * @return array Inputs for the test method.
      */
-    public static function test___construct_provider(): array {
+    public static function test___construct_and___toString_provider(): array {
         return [
             'Single IPv4 address' => [
                 'ips' => ['127.0.0.1'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
+                'expected' => '127.0.0.1 foo Bar Baz',
             ],
             'IPv4 address range in CIDR notation' => [
                 'ips' => ['10.10.10.0/24'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
+                'expected' => '10.10.10.0/24 foo Bar Baz',
             ],
             'IPv4 address range with hyphen in last octet' => [
                 'ips' => ['192.168.0.100-200'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
+                'expected' => '192.168.0.100-200 foo Bar Baz',
             ],
             'IP address 0.0.0.0' => [
                 'ips' => ['0.0.0.0'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
+                'expected' => '0.0.0.0 foo Bar Baz',
             ],
             'Multiple valid addresses/ranges' => [
                 'ips' => ['127.0.0.1', '10.10.10.0/24', '192.168.0.100-200'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
+                'expected' => '127.0.0.1,10.10.10.0/24,192.168.0.100-200 foo Bar Baz',
             ],
             'Invalid IPv4 address' => [
                 'ips' => ['1.20.30.400'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
-                'error' => coding_exception::class,
+                'expected' => new coding_exception('Not a valid IP address/range: 1.20.30.400'),
             ],
             'Incomplete IPv4 address' => [
                 'ips' => ['10.10.10.'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
-                'error' => coding_exception::class,
+                'expected' => new coding_exception('Not a valid IP address/range: 10.10.10.'),
             ],
             'Invalid CIDR length greater than 32' => [
                 'ips' => ['10.10.10.0/33'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
-                'error' => coding_exception::class,
+                'expected' => new coding_exception('Not a valid IP address/range: 10.10.10.0/33'),
             ],
             'Invalid last octet range greater than 255' => [
                 'ips' => ['192.168.0.100-256'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
-                'error' => coding_exception::class,
+                'expected' => new coding_exception('Not a valid IP address/range: 192.168.0.100-256'),
             ],
             'Invalid last octet empty range' => [
                 'ips' => ['192.168.0.100-90'],
                 'id' => 'foo',
                 'name' => 'Bar Baz',
-                'error' => coding_exception::class,
+                'expected' => new coding_exception('Not a valid IP address/range: 192.168.0.100-90'),
             ],
         ];
     }
 
     /**
+     * Test the {@see admin_ip_option::parse} method.
+     * 
      * @param string $line Input for the method.
      * @param array|null $expected Expected properties on the returned object or `null` if `null` is expected to be returned.
      */
