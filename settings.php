@@ -17,6 +17,8 @@
 /**
  * Definition of plugin-specific admin settings.
  *
+ * @link https://moodledev.io/docs/apis/subsystems/admin Moodle docs admin settings
+ *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

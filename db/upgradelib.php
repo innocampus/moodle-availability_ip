@@ -17,7 +17,7 @@
 /**
  * Utility functions used in the upgrade process.
  *
- * @see https://moodledev.io/docs/5.1/guides/upgrade
+ * @link https://moodledev.io/docs/guides/upgrade Moodle docs upgrade
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin

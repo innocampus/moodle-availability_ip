@@ -17,9 +17,13 @@
 /**
  * Version and requirements information for the plugin.
  *
+ * @link https://moodledev.io/docs/apis/commonfiles/version.php Moodle docs version.php
+ *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * {@noinspection PhpUndefinedVariableInspection}
  */
 
 defined('MOODLE_INTERNAL') || die();

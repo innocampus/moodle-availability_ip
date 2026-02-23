@@ -17,7 +17,7 @@
 /**
  * Contains the function for migrating the plugin from one version to a newer version.
  *
- * @see https://moodledev.io/docs/5.1/guides/upgrade#dbupgradephp
+ * @link https://moodledev.io/docs/guides/upgrade#dbupgradephp Moodle docs upgrade.php
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin

@@ -17,6 +17,8 @@
 /**
  * English language strings for the plugin.
  *
+ * @link https://docs.moodle.org/dev/String_API Moodle docs String API
+ *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

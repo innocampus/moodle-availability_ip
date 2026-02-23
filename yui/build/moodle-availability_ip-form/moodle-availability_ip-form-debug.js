@@ -3,14 +3,14 @@ YUI.add('moodle-availability_ip-form', function (Y, NAME) {
 /**
  * YUI code for extending the availability form.
  *
- * @see https://moodledev.io/docs/4.5/apis/plugintypes/availability#yuisrcjsformjs
+ * @link https://moodledev.io/docs/apis/plugintypes/availability#yuisrcjsformjs Moodle docs availability YUI
  *
  * @package    availability_ip
  * @copyright  2025 Daniel Fainberg, TU Berlin
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// Identifier availability_ip has to be used, but does not follow Moodle's naming convention.
+// Identifier availability_ip has to be used but does not follow Moodle's naming convention.
 /* eslint-disable camelcase */
 
 /**
