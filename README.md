@@ -1,4 +1,4 @@
-# IP availability condition - `moodle-availability_ip`
+# `availability_ip`
 
 Availability plugin for [Moodle][moodle home] making it possible to [restrict access][moodle docs restrict access] to activities and sections by IP address.
 
