@@ -37,7 +37,7 @@ require_once(__DIR__ . '/upgradelib.php');
  * @return true The update concluded successfully.
  * @throws moodle_exception The update failed.
  */
-function xmldb_availability_ip_upgrade(int $oldversion = 0): true {
+function xmldb_availability_ip_upgrade(int $oldversion = 0): bool {
     if ($oldversion < 2025081900) {
         try {
             replace_custom_single_ips_with_arrays();
