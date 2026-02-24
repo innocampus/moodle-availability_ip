@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_ip';
 $plugin->version = 2025111300;
-$plugin->requires = 2024042200;  // Moodle 4.4.0+.
+$plugin->requires = 2025041400;  // Moodle 5.0.0+.
+$plugin->supported = [500, 501];
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = '0.5.0';
