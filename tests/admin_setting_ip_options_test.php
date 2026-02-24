@@ -221,7 +221,7 @@ final class admin_setting_ip_options_test extends advanced_testcase {
             'Bad line' => [
                 'data' => 'foo',
                 'expected' => get_string(
-                    identifier: 'settings_error_bad_lines',
+                    identifier: 'error:bad_lines',
                     component: 'availability_ip',
                     a: '"foo"',
                 ),
@@ -229,7 +229,7 @@ final class admin_setting_ip_options_test extends advanced_testcase {
             'Duplicate IDs' => [
                 'data' => "1.0.0.1 foo Foo \n 1.1.1.1 foo Bar",
                 'expected' => get_string(
-                    identifier: 'settings_error_duplicate_option_id',
+                    identifier: 'error:duplicate_option_id',
                     component: 'availability_ip',
                     a: ['id'  => 'foo', 'line' => 2],
                 ),

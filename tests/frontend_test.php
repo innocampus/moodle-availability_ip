@@ -102,11 +102,11 @@ final class frontend_test extends advanced_testcase {
         };
         $output = $closure->call($frontend);
         $expected = [
-            'custom_ip',
-            'custom_ip_help',
-            'error_custom_ip',
-            'error_select_ip',
-            'ip_options_select',
+            'form:custom_ip',
+            'form:custom_ip:help',
+            'form:ip_options_select',
+            'yui_error_custom_ip_invalid',
+            'yui_error_no_ip_selected',
         ];
         self::assertSame($expected, $output);
     }
