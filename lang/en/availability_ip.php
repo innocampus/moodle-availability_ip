@@ -26,16 +26,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['condition_description'] = 'IP address allowed';
-$string['custom_ip'] = 'Custom IP addresses';
-$string['custom_ip_help'] = 'Input must either be a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address. You can specify more than one by comma-separating your IP addresses/ranges.';
+$string['condition:description'] = 'IP address allowed';
+$string['config:ip_option_presets'] = 'Preconfigured IP options';
+$string['config:ip_option_presets:help'] = '<p>List of preconfigured options for the IP address/range availability condition that can be selected. Put every entry on one line.</p><p>Entries must be in the format <code>IPs unique_shortname Displayname</code>, where <code>IPs</code> is either a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address. You can set multiple <code>IPs</code> by separating them with commas. <code>unique_shortname</code> may only consist of lower-case letters (<code>a-z</code>) and underscores (<code>_</code>).</p><p>Example:<pre>192.168.7.0/24,10.0.1.0-9 pc_pool  Local University PC Pool<br>111.222.33.44             admin_hq Admin HQ</pre></p><p><strong>CAUTION: Deleting options or changing their short names later can break existing access restrictions!</strong></p>';
 $string['description'] = 'Allow only students with certain IP addresses.';
-$string['error_custom_ip'] = 'Invalid IP address entered.';
-$string['error_select_ip'] = 'No IP address/range selected.';
-$string['ip_option_presets'] = 'Preconfigured IP options';
-$string['ip_option_presets_help'] = '<p>List of preconfigured options for the IP address/range availability condition that can be selected. Put every entry on one line.</p><p>Entries must be in the format <code>IPs unique_shortname Displayname</code>, where <code>IPs</code> is either a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address. You can set multiple <code>IPs</code> by separating them with commas. <code>unique_shortname</code> may only consist of lower-case letters (<code>a-z</code>) and underscores (<code>_</code>).</p><p>Example:<pre>192.168.7.0/24,10.0.1.0-9 pc_pool  Local University PC Pool<br>111.222.33.44             admin_hq Admin HQ</pre></p><p><strong>CAUTION: Deleting options or changing their short names later can break existing access restrictions!</strong></p>';
-$string['ip_options_select'] = 'Access from any of the selected IP address ranges:';
+$string['error:bad_lines'] = 'Lines not in a valid format: {$a}';
+$string['error:duplicate_option_id'] = 'The shortname \'{$a->id}\' in line {$a->line} was already used above.';
+$string['form:custom_ip'] = 'Custom IP addresses';
+$string['form:custom_ip:help'] = 'Input must either be a full IP address (such as <code>192.168.10.1</code>) which matches a single host; or CIDR notation (such as <code>231.54.211.0/20</code>); or a range of IP addresses (such as <code>231.3.56.10-20</code>) where the range applies to the last part of the address. You can specify more than one by comma-separating your IP addresses/ranges.';
+$string['form:ip_options_select'] = 'Access from any of the selected IP address ranges:';
 $string['pluginname'] = 'Restriction by IP';
-$string['settings_error_bad_lines'] = 'Lines not in a valid format: {$a}';
-$string['settings_error_duplicate_option_id'] = 'The shortname \'{$a->id}\' in line {$a->line} was already used above.';
 $string['title'] = 'IP';
+$string['yui_error_custom_ip_invalid'] = 'Invalid IP address entered.';
+$string['yui_error_no_ip_selected'] = 'No IP address/range selected.';

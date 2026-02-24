@@ -92,7 +92,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
             if ($option = admin_ip_option::parse($line)) {
                 if (array_key_exists($option->id, $options)) {
                     return get_string(
-                        identifier: 'settings_error_duplicate_option_id',
+                        identifier: 'error:duplicate_option_id',
                         component: 'availability_ip',
                         a: ['id'  => $option->id, 'line' => $idx + 1],
                     );
@@ -104,7 +104,7 @@ class admin_setting_ip_options extends admin_setting_configtextarea {
         }
         if ($badlines) {
             return get_string(
-                identifier: 'settings_error_bad_lines',
+                identifier: 'error:bad_lines',
                 component: 'availability_ip',
                 a: '"' . implode('", "', $badlines) . '"',
             );

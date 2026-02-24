@@ -55,7 +55,7 @@ M.availability_ip.form.getNode = function(json) {
     // TODO: Unfortunately, due to the synchronous way this is implemented in the `core_availability` YUI module,
     //       it is impossible to use the asynchronous `core/templates` utilities without ugly hacks,
     //       so we are stuck with wonderful string concatenation for now.
-    var html = '<div class="pb-2">' + M.util.get_string('ip_options_select', 'availability_ip') + '</div> ' +
+    var html = '<div class="pb-2">' + M.util.get_string('form:ip_options_select', 'availability_ip') + '</div> ' +
                '<div class="availability-group availability_ip-options">';
     var initialValues = json.ids !== undefined ? json.ids : [];
     this.ipoptions.forEach(function(option) {
@@ -79,7 +79,7 @@ M.availability_ip.form.getNode = function(json) {
     html += '<div class="form-check">' +
             '<label class="form-check-label">' +
             '<input class="form-check-input" type="checkbox" value="" name="-custom-check-"' + customChecked + '>' +
-            M.util.get_string('custom_ip', 'availability_ip') +
+            M.util.get_string('form:custom_ip', 'availability_ip') +
             '</label>' +
             '</div>';
     html += '<div class="availability_ip-custom-container mt-2"' + customHidden + '>' +
@@ -88,7 +88,7 @@ M.availability_ip.form.getNode = function(json) {
                    'value="' + customValue + '" ' +
                    'class="form-control">' +
             '<div class="form-text text-muted">' +
-            M.util.get_string('custom_ip_help', 'availability_ip') +
+            M.util.get_string('form:custom_ip:help', 'availability_ip') +
             '</div>' +
             '</div>';
     html += '</div>';
@@ -169,14 +169,14 @@ M.availability_ip.form.fillErrors = function(errors, node) {
             // If range notation is used, ensure the end of the range is greater than or equal to the start of the range.
             var matches = regex.exec(ip);
             if (matches === null || matches.length === 5 && parseInt(matches[2]) > parseInt(matches[4])) {
-                errors.push('availability_ip:error_custom_ip');
+                errors.push('availability_ip:yui_error_custom_ip_invalid');
                 return false; // Do not bother checking any following IPs if an error is encountered.
             }
             return true;
         });
     } else if (value.ids.length === 0) {
         // Neither a custom input was provided nor a checkbox selected.
-        errors.push('availability_ip:error_select_ip');
+        errors.push('availability_ip:yui_error_no_ip_selected');
     }
     // TODO: Unfortunately the Moodle code handling the errors array is poorly implemented.
     //       If there was one error previously and there is a _different_ one now, the old one is still displayed.

@@ -63,11 +63,11 @@ class frontend extends abstract_frontend {
     #[\Override]
     protected function get_javascript_strings(): array {
         return [
-            'custom_ip',
-            'custom_ip_help',
-            'error_custom_ip',
-            'error_select_ip',
-            'ip_options_select',
+            'form:custom_ip',
+            'form:custom_ip:help',
+            'form:ip_options_select',
+            'yui_error_custom_ip_invalid',
+            'yui_error_no_ip_selected',
         ];
     }
 }

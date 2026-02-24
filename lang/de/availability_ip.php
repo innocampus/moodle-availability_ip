@@ -26,16 +26,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['condition_description'] = 'IP-Adresse zugelassen';
-$string['custom_ip'] = 'Selbstgewählte IP-Adressen';
-$string['custom_ip_help'] = 'Die Eingabe muss eine vollständige IP-Adresse für ein einzelnes Gerät (z.B. <code>192.168.10.1</code>), ein IP-Adressbereich (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder eine IP-Adresse in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>) sein. Sie können mehrere festlegen, indem Sie Ihre IP-Adressen/Adressbereiche durch Kommas trennen.';
+$string['condition:description'] = 'IP-Adresse zugelassen';
+$string['config:ip_option_presets'] = 'Voreingestellte IP Optionen';
+$string['config:ip_option_presets:help'] = '<p>Liste voreingestellter Optionen für die IP Voraussetzung, aus denen gewählt werden kann. Schreiben Sie jede Option in eine neue Zeile.</p><p>Optionen müssen in der Form <code>IP eindeutiger_kurzname Anzeigename</code> sein, wobei <code>IP</code> eine vollständige IP-Adresse für ein einzelnes Gerät ist (z.B. <code>192.168.10.1</code>). Ebenfalls gültig als <code>IP</code> sind IP-Adressbereiche (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder IP-Adressen in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>). Mehrere <code>IPs</code> können durch Komma getrennt aufgeführt werden. <code>eindeutiger_kurzname</code> darf nur aus Kleinbuchstaben (<code>a-z</code>) und Unterstrichen (<code>_</code>) bestehen.</p><p>Beispiel:<pre>192.168.7.0/24,10.0.1.0-9 pc_pool  Lokaler PC Pool der Universität<br>111.222.33.44             admin_hq Admin HQ</pre></p><p><strong>ACHTUNG: Ein nachträgliches Entfernen von Optionen oder Ändern von Kurznamen kann bestehende Voraussetzungen zerstören!</strong></p>';
 $string['description'] = 'Erlaube den Zugriff nur von bestimmten IP-Adressen.';
-$string['error_custom_ip'] = 'Keine valide IP-Adresse eingegeben.';
-$string['error_select_ip'] = 'Keine IP-Adressen/Adressbereiche ausgewählt.';
-$string['ip_option_presets'] = 'Voreingestellte IP Optionen';
-$string['ip_option_presets_help'] = '<p>Liste voreingestellter Optionen für die IP Voraussetzung, aus denen gewählt werden kann. Schreiben Sie jede Option in eine neue Zeile.</p><p>Optionen müssen in der Form <code>IP eindeutiger_kurzname Anzeigename</code> sein, wobei <code>IP</code> eine vollständige IP-Adresse für ein einzelnes Gerät ist (z.B. <code>192.168.10.1</code>). Ebenfalls gültig als <code>IP</code> sind IP-Adressbereiche (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder IP-Adressen in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>). Mehrere <code>IPs</code> können durch Komma getrennt aufgeführt werden. <code>eindeutiger_kurzname</code> darf nur aus Kleinbuchstaben (<code>a-z</code>) und Unterstrichen (<code>_</code>) bestehen.</p><p>Beispiel:<pre>192.168.7.0/24,10.0.1.0-9 pc_pool  Lokaler PC Pool der Universität<br>111.222.33.44             admin_hq Admin HQ</pre></p><p><strong>ACHTUNG: Ein nachträgliches Entfernen von Optionen oder Ändern von Kurznamen kann bestehende Voraussetzungen zerstören!</strong></p>';
-$string['ip_options_select'] = 'Aus einem der ausgewählten IP-Adressbereiche zugreifen:';
+$string['error:bad_lines'] = 'Zeilen nicht in gültiger Form: {$a}';
+$string['error:duplicate_option_id'] = 'Der Kurzname \'{$a->id}\' in Zeile {$a->line} wird weiter oben bereits verwendet.';
+$string['form:custom_ip'] = 'Selbstgewählte IP-Adressen';
+$string['form:custom_ip:help'] = 'Die Eingabe muss eine vollständige IP-Adresse für ein einzelnes Gerät (z.B. <code>192.168.10.1</code>), ein IP-Adressbereich (z.B. <code>231.3.56.10-20</code>) für alle IP-Adressen im Bereich (hier 10 bis 20) oder eine IP-Adresse in der CIDR-Schreibweise (z.B. <code>231.54.211.0/20</code>) sein. Sie können mehrere festlegen, indem Sie Ihre IP-Adressen/Adressbereiche durch Kommas trennen.';
+$string['form:ip_options_select'] = 'Aus einem der ausgewählten IP-Adressbereiche zugreifen:';
 $string['pluginname'] = 'Voraussetzung IP';
-$string['settings_error_bad_lines'] = 'Zeilen nicht in gültiger Form: {$a}';
-$string['settings_error_duplicate_option_id'] = 'Der Kurzname \'{$a->id}\' in Zeile {$a->line} wird weiter oben bereits verwendet.';
 $string['title'] = 'IP';
+$string['yui_error_custom_ip_invalid'] = 'Keine valide IP-Adresse eingegeben.';
+$string['yui_error_no_ip_selected'] = 'Keine IP-Adressen/Adressbereiche ausgewählt.';

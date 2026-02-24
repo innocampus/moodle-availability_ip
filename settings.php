@@ -37,8 +37,8 @@ if ($hassiteconfig && $ADMIN->fulltree) {
     $settings->add(
         new admin_setting_ip_options(
             name: 'availability_ip/ip_option_presets',
-            visiblename: new lang_string('ip_option_presets', 'availability_ip'),
-            description: new lang_string('ip_option_presets_help', 'availability_ip'),
+            visiblename: new lang_string('config:ip_option_presets', 'availability_ip'),
+            description: new lang_string('config:ip_option_presets:help', 'availability_ip'),
             defaultsetting: '',
         )
     );

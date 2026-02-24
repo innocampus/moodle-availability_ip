@@ -128,7 +128,7 @@ class condition extends abstract_condition {
      */
     #[\Override]
     public function get_description($full, $not, info $info): string {
-        return get_string('condition_description', 'availability_ip');
+        return get_string('condition:description', 'availability_ip');
     }
 
     #[\Override]
