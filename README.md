@@ -33,7 +33,7 @@ Admins can predefine certain IP addresses or ranges that teachers can choose fro
 This is done through the `availability_ip | ip_option_presets` setting.
 Each line in the text field represents one IP address/range option.
 
-**TODO: Screenshot**
+![Screenshot: Admin option presets][screenshot admin option presets]
 
 Entries must be in the format `IPs unique_shortname Displayname`, where `IPs` is either a full IP address (such as `192.168.10.1`) which matches a single host; or CIDR notation (such as `231.54.211.0/20`); or a range of IP addresses (such as `231.3.56.10-20`) where the range applies to the last part of the address.
 Multiple IPs can be set by separating them with commas.
@@ -46,7 +46,7 @@ Teachers and other users with the necessary permissions will find the condition 
 
 In addition to relying on the IP address/range options that admins pre-defined (see above), teachers can also enter custom IP addresses/ranges by selecting the _Custom IP addresses_ checkbox.
 
-**TODO: Screenshot**
+![Screenshot: Restrict access form][screenshot restrict access form]
 
 If a student tries to view an activity/section restricted by this condition, access will be granted only if the associated client's IP address/range matches **at least one** of the options that were selected.
 
@@ -73,3 +73,5 @@ You should have received a copy of the GNU General Public License along with `av
 [moodle docs restrict access activity]: https://docs.moodle.org/en/Restrict_access_settings#Restricting_activity_access
 [moodle docs restrict access settings]: https://docs.moodle.org/en/Restrict_access_settings
 [moodle home]: https://moodle.com
+[screenshot admin option presets]: https://github.com/innocampus/moodle-availability_ip/blob/main/docs/img/admin_ip_option_presets.png?raw=true
+[screenshot restrict access form]: https://github.com/innocampus/moodle-availability_ip/blob/main/docs/img/restrict_access_form.png?raw=true
