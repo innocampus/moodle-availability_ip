@@ -56,6 +56,13 @@ jobs:
             moodle-branch: MOODLE_502_STABLE
 
     steps:
+      # GitHub runners resolve `localhost` to IPv6 `::1` first, so Behat's web server binds there and
+      # the session `lastip` becomes `::1`. The plugin is IPv4-only, which makes every scenario fail.
+      # Force `localhost` to resolve to IPv4.
+      # TODO: Drop this step, if/when the plugin gains IPv6 support.
+      - name: Force IPv4 localhost for Behat
+        run: sudo sed -i '/^::1/ s/\blocalhost\b//g' /etc/hosts
+
       - name: Check out repository code
         uses: actions/checkout@v7
         with:
