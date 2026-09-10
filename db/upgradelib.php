@@ -25,66 +25,90 @@
  */
 
 /**
- * Finds every course module with an IP availability condition and ensures its `custom` property is an array.
+ * Finds every course module and course section with an IP availability condition and ensures its `custom` property is an array.
  *
  * @throws dml_exception An issue with the DB queries/transaction.
  * @throws JsonException Something went wrong re-encoding the availability object for one of the records.
  */
 function replace_custom_single_ips_with_arrays(): void {
     global $DB;
-    $recordset = $DB->get_recordset_select(
-        table: 'course_modules',
-        select: $DB->sql_like('availability', ':iptype'),
-        params: ['iptype' => '%"type":"ip"%'],
-        fields: 'id, availability',
-    );
     $transaction = $DB->start_delegated_transaction();
     try {
-        foreach ($recordset as $record) {
-            if (replace_custom_single_ip_with_array($record)) {
-                $DB->update_record('course_modules', $record);
+        foreach (['course_modules', 'course_sections'] as $table) {
+            $recordset = $DB->get_recordset_select(
+                table: $table,
+                select: $DB->sql_like('availability', ':iptype'),
+                params: ['iptype' => '%"type":"ip"%'],
+                fields: 'id, availability',
+            );
+            try {
+                foreach ($recordset as $record) {
+                    if (replace_custom_single_ip_with_array($record)) {
+                        $DB->update_record($table, $record);
+                    }
+                }
+            } finally {
+                $recordset->close();
             }
         }
         $transaction->allow_commit();
         // @codeCoverageIgnoreStart
     } catch (dml_exception | JsonException $e) {
-        if (!empty($transaction) && !$transaction->is_disposed()) {
+        if (!$transaction->is_disposed()) {
             $transaction->rollback($e);
         }
         throw $e;
         // @codeCoverageIgnoreEnd
-    } finally {
-        $recordset->close();
     }
 }
 
 /**
- * Replaces a string in the `custom` property of an IP availability condition with an array for a given course module record.
+ * Replaces strings in the `custom` property of every IP availability condition of a course module/section record.
  *
- * @param stdClass $record DB record representing a course module; must have the `availability` property.
+ * @param stdClass $record DB record representing a course module or course section; must have the `availability` property.
  * @return bool Whether the `availability` property was modified.
  * @throws JsonException Something went wrong re-encoding the availability object.
  */
 function replace_custom_single_ip_with_array(stdClass $record): bool {
     $availability = json_decode($record->availability);
-    if (is_null($availability)) {
+    if (!is_object($availability)) {
         // Should not happen, but just in case.
         return false; // @codeCoverageIgnore
     }
-    $conditions = $availability->c ?? null;
-    if (!is_array($conditions)) {
+    if (!replace_custom_single_ips_in_tree($availability)) {
+        return false;
+    }
+    $record->availability = json_encode($availability, JSON_THROW_ON_ERROR);
+    return true;
+}
+
+/**
+ * Recursively replaces strings in the `custom` property of every IP condition in an availability tree.
+ *
+ * Conditions can be nested inside arbitrarily deep subtrees (restriction sets), so recursion is necessary.
+ *
+ * @param stdClass $tree Decoded availability tree; its children are expected in the `c` property.
+ * @return bool Whether any condition in the tree was modified.
+ */
+function replace_custom_single_ips_in_tree(stdClass $tree): bool {
+    $children = $tree->c ?? null;
+    if (!is_array($children)) {
         // Should not happen, but just in case.
         return false; // @codeCoverageIgnore
     }
     $replaced = false;
-    foreach ($conditions as $condition) {
-        if (($condition->type ?? null) === 'ip' && is_string($condition->custom ?? null)) {
-            $condition->custom = $condition->custom === '' ? [] : [$condition->custom];
+    foreach ($children as $child) {
+        if (!is_object($child)) {
+            // Should not happen, but just in case.
+            continue; // @codeCoverageIgnore
+        }
+        if (!isset($child->type)) {
+            // Not a condition; must be a subtree.
+            $replaced = replace_custom_single_ips_in_tree($child) || $replaced;
+        } else if ($child->type === 'ip' && is_string($child->custom ?? null)) {
+            $child->custom = $child->custom === '' ? [] : [$child->custom];
             $replaced = true;
         }
-    }
-    if ($replaced) {
-        $record->availability = json_encode($availability, JSON_THROW_ON_ERROR);
     }
     return $replaced;
 }

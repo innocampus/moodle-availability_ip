@@ -46,5 +46,14 @@ function xmldb_availability_ip_upgrade(int $oldversion = 0): bool {
         }
         upgrade_plugin_savepoint(true, 2025081900, 'availability', 'ip');
     }
+    if ($oldversion < 2026091000) {
+        // The 2025081900 step missed conditions nested in restriction sets as well as those on course sections.
+        try {
+            replace_custom_single_ips_with_arrays();
+        } catch (Exception $e) {
+            throw new upgrade_exception('availability_ip', 2026091000, $e->getMessage());
+        }
+        upgrade_plugin_savepoint(true, 2026091000, 'availability', 'ip');
+    }
     return true;
 }

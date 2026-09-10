@@ -43,6 +43,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 #[CoversFunction('replace_custom_single_ips_with_arrays')]
 #[CoversFunction('replace_custom_single_ip_with_array')]
+#[CoversFunction('replace_custom_single_ips_in_tree')]
 final class upgradelib_test extends advanced_testcase {
     #[\Override]
     public static function setUpBeforeClass(): void {
@@ -87,6 +88,30 @@ final class upgradelib_test extends advanced_testcase {
     }
 
     /**
+     * Tests that {@see replace_custom_single_ips_with_arrays} also migrates conditions set on course sections.
+     *
+     * @throws dml_exception
+     * @throws JsonException
+     */
+    public function test_replace_custom_single_ips_with_arrays_on_section(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['numsections' => 1]);
+        $sectionid = $DB->get_field('course_sections', 'id', ['course' => $course->id, 'section' => 1], MUST_EXIST);
+        $DB->set_field(
+            table: 'course_sections',
+            newfield: 'availability',
+            newvalue: json_encode(tree::get_root_json([['type' => 'ip', 'ids' => [], 'custom' => '127.0.0.1']])),
+            conditions: ['id' => $sectionid],
+        );
+        replace_custom_single_ips_with_arrays();
+        self::assertSame(
+            json_encode(tree::get_root_json([['type' => 'ip', 'ids' => [], 'custom' => ['127.0.0.1']]])),
+            $DB->get_field('course_sections', 'availability', ['id' => $sectionid], MUST_EXIST),
+        );
+    }
+
+    /**
      * Data provider for the {@see test_replace_custom_single_ips_with_arrays} method.
      *
      * @return array[] Inputs for the test method.
@@ -116,6 +141,27 @@ final class upgradelib_test extends advanced_testcase {
                 'expected' => [
                     $unrelatedcondition,
                     ['type' => 'ip', 'ids' => [], 'custom' => []],
+                ],
+            ],
+            'Custom IP condition nested in a restriction set' => [
+                'module' => 'page',
+                'initial' => [
+                    $unrelatedcondition,
+                    tree::get_nested_json([
+                        ['type' => 'ip', 'ids' => [], 'custom' => '127.0.0.1'],
+                        tree::get_nested_json([
+                            ['type' => 'ip', 'ids' => ['foo'], 'custom' => '10.0.0.0/8'],
+                        ], tree::OP_OR),
+                    ]),
+                ],
+                'expected' => [
+                    $unrelatedcondition,
+                    tree::get_nested_json([
+                        ['type' => 'ip', 'ids' => [], 'custom' => ['127.0.0.1']],
+                        tree::get_nested_json([
+                            ['type' => 'ip', 'ids' => ['foo'], 'custom' => ['10.0.0.0/8']],
+                        ], tree::OP_OR),
+                    ]),
                 ],
             ],
             'Unrelated availability condition' => [
